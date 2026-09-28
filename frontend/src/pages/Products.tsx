@@ -1,5 +1,4 @@
 import { useMemo, useState } from "react";
-import SearchBar from "../components/SearchBar";
 import ProductCard from "../components/ProductCard";
 import { CATEGORIES, type CategoryId } from "../data/categories";
 import { MOCK_PRODUCTS } from "../data/mockProducts";
@@ -38,9 +37,8 @@ export default function Products() {
   }
 
   return (
-    <div className="products">
+    <div className="products container">
       <header className="products__header">
-        <SearchBar />
         <div className="products__tabs">
           <button
             type="button"

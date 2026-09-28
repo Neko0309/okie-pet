@@ -1,17 +1,19 @@
 .account {
   flex: 1;
-  padding: 16px;
+  padding: 60px 16px;
   display: flex;
   flex-direction: column;
+  align-items: center;
   gap: 16px;
 }
 
 .account--centered {
-  align-items: center;
   justify-content: center;
 }
 
 .account__profile {
+  width: 100%;
+  max-width: 380px;
   background: var(--color-surface);
   border-radius: 16px;
   padding: 28px 20px;
@@ -55,6 +57,8 @@
 }
 
 .account__logout {
+  width: 100%;
+  max-width: 380px;
   background: var(--color-surface);
   border: 1px solid var(--color-card-line);
   color: var(--color-danger);
@@ -66,6 +70,7 @@
 
 .auth-card {
   width: 100%;
+  max-width: 380px;
   background: var(--color-surface);
   border-radius: 18px;
   padding: 20px;

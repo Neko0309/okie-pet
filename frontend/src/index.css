@@ -34,13 +34,23 @@ body {
 }
 
 #root {
-  max-width: 480px;
-  margin: 0 auto;
   min-height: 100svh;
   background: var(--color-bg);
   display: flex;
   flex-direction: column;
-  box-shadow: 0 0 40px rgba(0, 0, 0, 0.06);
+}
+
+.container {
+  width: 100%;
+  max-width: 1200px;
+  margin: 0 auto;
+  padding: 0 40px;
+}
+
+@media (max-width: 720px) {
+  .container {
+    padding: 0 20px;
+  }
 }
 
 h1, h2, h3, p {
