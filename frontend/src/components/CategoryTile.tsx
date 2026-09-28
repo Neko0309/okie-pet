@@ -1,4 +1,5 @@
 import type { ReactNode } from "react";
+import { Link } from "react-router-dom";
 import { useTranslation } from "react-i18next";
 import type { Category } from "../data/categories";
 import "./CategoryTile.css";
@@ -109,7 +110,7 @@ const ICONS: Record<string, ReactNode> = {
 export default function CategoryTile({ category }: { category: Category }) {
   const { t } = useTranslation();
   return (
-    <button className="category-tile" type="button">
+    <Link className="category-tile" to={`/products?cat=${category.id}`}>
       <div className="category-tile__blob">
         <svg viewBox="0 0 120 110" aria-hidden="true">
           <path
@@ -121,6 +122,6 @@ export default function CategoryTile({ category }: { category: Category }) {
         </svg>
       </div>
       <span className="category-tile__label">{t(`category.${category.id}`)}</span>
-    </button>
+    </Link>
   );
 }
