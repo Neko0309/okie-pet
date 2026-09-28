@@ -1,30 +1,24 @@
-import { useEffect, useState } from "react";
-import { api } from "./lib/api";
-import "./App.css";
+import { BrowserRouter, Routes, Route } from "react-router-dom";
+import { AuthProvider } from "./lib/auth";
+import BottomNav from "./components/BottomNav";
+import Home from "./pages/Home";
+import Products from "./pages/Products";
+import Cart from "./pages/Cart";
+import Account from "./pages/Account";
 
 function App() {
-  const [apiStatus, setApiStatus] = useState<"checking" | "ok" | "error">(
-    "checking",
-  );
-
-  useEffect(() => {
-    api
-      .get("/health")
-      .then(() => setApiStatus("ok"))
-      .catch(() => setApiStatus("error"));
-  }, []);
-
   return (
-    <section id="center">
-      <h1>Okie Pet</h1>
-      <p>Pet supplies, coming soon.</p>
-      <p>
-        Backend API:{" "}
-        {apiStatus === "checking" && "checking..."}
-        {apiStatus === "ok" && "✅ connected"}
-        {apiStatus === "error" && "❌ not reachable (is uvicorn running?)"}
-      </p>
-    </section>
+    <AuthProvider>
+      <BrowserRouter>
+        <Routes>
+          <Route path="/" element={<Home />} />
+          <Route path="/products" element={<Products />} />
+          <Route path="/cart" element={<Cart />} />
+          <Route path="/account" element={<Account />} />
+        </Routes>
+        <BottomNav />
+      </BrowserRouter>
+    </AuthProvider>
   );
 }
 

@@ -1,0 +1,25 @@
+.category-tile {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 6px;
+  background: none;
+  border: none;
+  padding: 0;
+  color: var(--color-ink);
+}
+
+.category-tile__glyph {
+  width: 52px;
+  height: 52px;
+  border-radius: 16px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-size: 24px;
+}
+
+.category-tile__label {
+  font-size: 12.5px;
+  color: var(--color-ink-muted);
+}
