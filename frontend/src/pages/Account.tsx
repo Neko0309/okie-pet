@@ -1,4 +1,5 @@
 import { useState, type FormEvent } from "react";
+import { Link } from "react-router-dom";
 import { useTranslation } from "react-i18next";
 import { useAuth } from "../lib/auth";
 import "./Account.css";
@@ -26,6 +27,9 @@ function ProfileCard() {
         <p className="account__email">{user.email}</p>
         {user.is_admin && <span className="account__badge">{t("account.admin_badge")}</span>}
       </div>
+      <Link to="/orders" className="account__orders-link">
+        {t("nav.orders")}
+      </Link>
       <button type="button" className="account__logout" onClick={logout}>
         {t("account.logout")}
       </button>

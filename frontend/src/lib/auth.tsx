@@ -30,6 +30,10 @@ const AuthContext = createContext<AuthContextValue | null>(null);
 
 const TOKEN_KEY = "okiepet_token";
 
+export function getToken(): string | null {
+  return localStorage.getItem(TOKEN_KEY);
+}
+
 export function AuthProvider({ children }: { children: ReactNode }) {
   const [user, setUser] = useState<User | null>(null);
   const [loading, setLoading] = useState(true);

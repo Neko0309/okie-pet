@@ -6,7 +6,8 @@
     "home": "Home",
     "all": "All",
     "account": "Account",
-    "cart": "Cart"
+    "cart": "Cart",
+    "orders": "My Orders"
   },
   "category": {
     "freeze-dried": "Freeze-dried",
@@ -54,7 +55,18 @@
     "remove": "Remove",
     "subtotal": "Subtotal",
     "checkout": "Checkout",
-    "checkout_note": "Checkout is still in development — you can't place a real order yet"
+    "placing": "Placing order…",
+    "login_to_checkout": "Log in to check out",
+    "checkout_error_default": "Couldn't place the order, please try again"
+  },
+  "orders": {
+    "title": "My Orders",
+    "empty_title": "No orders yet",
+    "empty_sub": "Go find something your pet will love",
+    "just_placed": "Order placed! Order number {{orderNumber}}",
+    "order_label": "Order",
+    "placed_at": "Placed",
+    "subtotal": "Total"
   },
   "account": {
     "login": "Log in",

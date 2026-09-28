@@ -1,14 +1,40 @@
 import { useState } from "react";
-import { Link } from "react-router-dom";
+import { Link, useNavigate } from "react-router-dom";
 import { useTranslation } from "react-i18next";
 import { useCart } from "../lib/cart";
+import { useAuth } from "../lib/auth";
 import { localize } from "../lib/localize";
+import { createOrder } from "../lib/orders";
 import "./Cart.css";
 
 export default function Cart() {
   const { t, i18n } = useTranslation();
-  const { items, subtotal, updateQuantity, removeItem } = useCart();
-  const [showCheckoutNote, setShowCheckoutNote] = useState(false);
+  const { items, subtotal, updateQuantity, removeItem, clear } = useCart();
+  const { user } = useAuth();
+  const navigate = useNavigate();
+  const [submitting, setSubmitting] = useState(false);
+  const [error, setError] = useState<string | null>(null);
+
+  async function handleCheckout() {
+    if (!user) return;
+    setSubmitting(true);
+    setError(null);
+    try {
+      const order = await createOrder(
+        items.map((i) => ({
+          product_id: i.productId,
+          variant_id: i.variantId,
+          quantity: i.quantity,
+        })),
+      );
+      clear();
+      navigate("/orders", { state: { justPlaced: order.order_number } });
+    } catch (e: any) {
+      setError(e?.response?.data?.detail ?? t("cart.checkout_error_default"));
+    } finally {
+      setSubmitting(false);
+    }
+  }
 
   if (items.length === 0) {
     return (
@@ -95,16 +121,23 @@ export default function Cart() {
             <span>{t("cart.subtotal")}</span>
             <b>${subtotal.toFixed(2)}</b>
           </div>
-          <button
-            type="button"
-            className="cart-summary__checkout"
-            onClick={() => setShowCheckoutNote(true)}
-          >
-            {t("cart.checkout")}
-          </button>
-          {showCheckoutNote && (
-            <p className="cart-summary__note">{t("cart.checkout_note")}</p>
+
+          {user ? (
+            <button
+              type="button"
+              className="cart-summary__checkout"
+              disabled={submitting}
+              onClick={handleCheckout}
+            >
+              {submitting ? t("cart.placing") : t("cart.checkout")}
+            </button>
+          ) : (
+            <Link to="/account" className="cart-summary__checkout">
+              {t("cart.login_to_checkout")}
+            </Link>
           )}
+
+          {error && <p className="cart-summary__note cart-summary__note--error">{error}</p>}
         </aside>
       </div>
     </div>

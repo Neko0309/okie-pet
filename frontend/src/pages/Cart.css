@@ -186,6 +186,7 @@
 }
 
 .cart-summary__checkout {
+  display: block;
   background: var(--color-accent);
   color: #fff;
   border: none;
@@ -193,6 +194,11 @@
   padding: 12px;
   font-size: 14px;
   font-weight: 700;
+  text-align: center;
+}
+
+.cart-summary__checkout:disabled {
+  opacity: 0.6;
 }
 
 .cart-summary__note {
@@ -200,6 +206,10 @@
   color: var(--color-ink-muted);
   text-align: center;
   margin: 0;
+}
+
+.cart-summary__note--error {
+  color: var(--color-danger);
 }
 
 @media (max-width: 760px) {
