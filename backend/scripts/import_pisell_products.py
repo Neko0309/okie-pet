@@ -70,13 +70,22 @@ def to_product_input(raw: dict) -> ProductInput:
     vendor_list = raw.get("vendor") or []
     category_list = raw.get("category") or []
 
+    # Same unreliable-parent-aggregate issue as price: sum the variants'
+    # own stock when there are any, rather than trusting sum_stock/
+    # stock_quantity on the parent record.
+    variants = raw.get("variant") or []
+    if variants:
+        stock = sum((v.get("stock_quantity") or 0) for v in variants)
+    else:
+        stock = raw.get("sum_stock", raw.get("stock_quantity", 0)) or 0
+
     return ProductInput(
         external_id=str(raw["id"]),
         external_source=EXTERNAL_SOURCE,
         name=raw["title"],
         price=price,
         original_price=to_decimal(raw.get("original_price")),
-        stock_quantity=raw.get("sum_stock", raw.get("stock_quantity", 0)) or 0,
+        stock_quantity=stock,
         category_names=[c.get("name") for c in category_list if c.get("name")],
         vendor=vendor_list[0]["name"] if vendor_list else None,
         image_url=raw.get("cover") or None,

@@ -82,7 +82,15 @@ def build_products(rows: list[dict]) -> list[ProductInput]:
         if price is None:
             price = to_decimal(0) or 0  # genuinely unpriced on Pisell's side too
 
-        stock = parent.get("stock_quantity") or 0
+        variant_rows = [r for r in product_rows if r is not parent]
+        if variant_rows:
+            # The parent row's own stock_quantity is unreliable — same issue
+            # as price, it's sometimes 0 while the real stock sits on each
+            # variant. Summing the variants is correct either way: when the
+            # parent value *is* accurate, it already equals this sum.
+            stock = sum((r.get("stock_quantity") or 0) for r in variant_rows)
+        else:
+            stock = parent.get("stock_quantity") or 0
         category = parent.get("category")
 
         items.append(
