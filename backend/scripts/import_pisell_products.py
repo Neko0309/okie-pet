@@ -77,7 +77,11 @@ def to_product_input(raw: dict) -> ProductInput:
     if price is None:
         variant_prices = [to_decimal(v.get("price")) for v in raw.get("variant") or []]
         variant_prices = [p for p in variant_prices if p]
-        price = min(variant_prices) if variant_prices else 0
+        price = min(variant_prices) if variant_prices else None
+    # Genuinely unpriced on Pisell's side — don't publish a $0 item.
+    is_unpriced = price is None
+    if is_unpriced:
+        price = 0
 
     vendor_list = raw.get("vendor") or []
     category_list = raw.get("category") or []
@@ -113,7 +117,7 @@ def to_product_input(raw: dict) -> ProductInput:
         vendor=vendor_list[0]["name"] if vendor_list else None,
         image_url=raw.get("cover") or None,
         description=raw.get("description") or None,
-        is_active=raw.get("status") == "published",
+        is_active=raw.get("status") == "published" and not is_unpriced,
         variants=variants,
     )
 

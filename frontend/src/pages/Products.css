@@ -36,15 +36,6 @@
   font-weight: 600;
 }
 
-.products__sort {
-  display: flex;
-  align-items: center;
-  gap: 8px;
-  flex: none;
-  color: var(--color-ink-muted);
-  font-size: 14px;
-}
-
 .products__grid {
   display: grid;
   grid-template-columns: repeat(auto-fill, minmax(220px, 1fr));

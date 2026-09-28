@@ -2,12 +2,11 @@ import { useEffect, useState } from "react";
 import { useSearchParams } from "react-router-dom";
 import { useTranslation } from "react-i18next";
 import ProductCard from "../components/ProductCard";
+import SortDropdown from "../components/SortDropdown";
 import { CATEGORIES, type CategoryId } from "../data/categories";
 import { fetchProducts, type ApiProduct, type ApiVariant, type SortMode } from "../lib/products";
 import { useCart } from "../lib/cart";
 import "./Products.css";
-
-const SORT_CYCLE: SortMode[] = ["recommended", "price-asc", "price-desc"];
 
 export default function Products() {
   const { t } = useTranslation();
@@ -34,11 +33,6 @@ export default function Products() {
       .catch(() => setProducts([]))
       .finally(() => setLoading(false));
   }, [activeCategory, sortMode]);
-
-  function cycleSort() {
-    const idx = SORT_CYCLE.indexOf(sortMode);
-    setSortMode(SORT_CYCLE[(idx + 1) % SORT_CYCLE.length]);
-  }
 
   function handleAdd(product: ApiProduct, variant: ApiVariant | null, quantity: number) {
     addItem(
@@ -79,10 +73,12 @@ export default function Products() {
             </button>
           ))}
         </div>
-        <button type="button" className="products__sort" onClick={cycleSort}>
-          {t("products.sort_label")}
-          {SORT_LABELS[sortMode]}
-        </button>
+        <SortDropdown
+          value={sortMode}
+          onChange={setSortMode}
+          labels={SORT_LABELS}
+          prefixLabel={t("products.sort_label")}
+        />
       </header>
 
       {!loading && (

@@ -94,8 +94,12 @@ def build_products(rows: list[dict]) -> list[ProductInput]:
             ]
             variant_prices = [p for p in variant_prices if p]
             price = min(variant_prices) if variant_prices else None
-        if price is None:
-            price = to_decimal(0) or 0  # genuinely unpriced on Pisell's side too
+        # Genuinely unpriced on Pisell's side (happens — a product created
+        # without ever setting a price). Don't publish a $0 item; keep the
+        # row (so stock/description still sync) but hide it from the store.
+        is_unpriced = price is None
+        if is_unpriced:
+            price = to_decimal(0) or 0
 
         variant_rows = [r for r in product_rows if r is not parent]
         if variant_rows:
@@ -131,7 +135,7 @@ def build_products(rows: list[dict]) -> list[ProductInput]:
                 vendor=parent.get("vendor"),
                 image_url=first_image(parent.get("image")),
                 description=parent.get("description") or None,
-                is_active=parent.get("status") == "published",
+                is_active=parent.get("status") == "published" and not is_unpriced,
                 variants=variants,
             )
         )
