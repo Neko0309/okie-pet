@@ -12,10 +12,15 @@ export interface CartItem {
   productId: string;
   variantId: string | null;
   name: string;
+  nameEn: string | null;
   variantName: string | null;
+  variantNameEn: string | null;
   price: number;
   image: string | null;
   quantity: number;
+  /** Stock at the time this was added — quantity is clamped to this so the
+   * cart can't ask for more than what's actually available. */
+  maxQuantity: number;
 }
 
 interface CartContextValue {
@@ -35,10 +40,28 @@ function itemKey(productId: string, variantId: string | null) {
   return `${productId}:${variantId ?? "base"}`;
 }
 
+function isValidItem(item: unknown): item is CartItem {
+  if (!item || typeof item !== "object") return false;
+  const i = item as Record<string, unknown>;
+  return (
+    typeof i.key === "string" &&
+    typeof i.productId === "string" &&
+    typeof i.name === "string" &&
+    typeof i.price === "number" &&
+    typeof i.quantity === "number" &&
+    typeof i.maxQuantity === "number"
+  );
+}
+
 function loadCart(): CartItem[] {
   try {
     const raw = localStorage.getItem(STORAGE_KEY);
-    return raw ? JSON.parse(raw) : [];
+    if (!raw) return [];
+    const parsed = JSON.parse(raw);
+    if (!Array.isArray(parsed)) return [];
+    // Drops items saved under an older shape of CartItem (e.g. before
+    // maxQuantity existed) instead of crashing on them.
+    return parsed.filter(isValidItem);
   } catch {
     return [];
   }
@@ -56,18 +79,26 @@ export function CartProvider({ children }: { children: ReactNode }) {
     setItems((prev) => {
       const existing = prev.find((i) => i.key === key);
       if (existing) {
+        const max = Math.max(1, existing.maxQuantity);
         return prev.map((i) =>
-          i.key === key ? { ...i, quantity: i.quantity + qty } : i,
+          i.key === key
+            ? { ...i, maxQuantity: input.maxQuantity, quantity: Math.min(i.quantity + qty, max) }
+            : i,
         );
       }
-      return [...prev, { ...input, key, quantity: qty }];
+      const max = Math.max(1, input.maxQuantity);
+      return [...prev, { ...input, key, quantity: Math.min(qty, max) }];
     });
   }
 
   function updateQuantity(key: string, quantity: number) {
     setItems((prev) => {
       if (quantity <= 0) return prev.filter((i) => i.key !== key);
-      return prev.map((i) => (i.key === key ? { ...i, quantity } : i));
+      return prev.map((i) =>
+        i.key === key
+          ? { ...i, quantity: Math.min(quantity, Math.max(1, i.maxQuantity)) }
+          : i,
+      );
     });
   }
 

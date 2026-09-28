@@ -46,9 +46,12 @@ export default function Products() {
         productId: product.id,
         variantId: variant?.id ?? null,
         name: product.name,
+        nameEn: product.name_en,
         variantName: variant?.name ?? null,
+        variantNameEn: variant?.name_en ?? null,
         price: Number(variant ? variant.price : product.price),
         image: product.image_url,
+        maxQuantity: variant ? variant.stock_quantity : product.stock_quantity,
       },
       quantity,
     );

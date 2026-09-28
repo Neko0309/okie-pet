@@ -1,6 +1,7 @@
 import { useState } from "react";
 import { useTranslation } from "react-i18next";
 import type { ApiProduct, ApiVariant } from "../lib/products";
+import { localize } from "../lib/localize";
 import AddToCartModal from "./AddToCartModal";
 import "./ProductCard.css";
 
@@ -13,9 +14,10 @@ export default function ProductCard({
   compact?: boolean;
   onAdd?: (product: ApiProduct, variant: ApiVariant | null, quantity: number) => void;
 }) {
-  const { t } = useTranslation();
+  const { t, i18n } = useTranslation();
   const [modalOpen, setModalOpen] = useState(false);
 
+  const name = localize(i18n.language, product.name, product.name_en);
   const price = Number(product.price);
   const oldPrice = product.old_price ? Number(product.old_price) : null;
   const soldOut = product.stock_quantity <= 0;
@@ -24,7 +26,7 @@ export default function ProductCard({
     <div className={"product-card" + (compact ? " is-compact" : "")}>
       <div className="product-card__image">
         {product.image_url ? (
-          <img src={product.image_url} alt={product.name} loading="lazy" />
+          <img src={product.image_url} alt={name} loading="lazy" />
         ) : (
           <div className="product-card__placeholder" aria-hidden="true">
             🐾
@@ -40,7 +42,7 @@ export default function ProductCard({
         )}
       </div>
       <div className="product-card__body">
-        <p className="product-card__name">{product.name}</p>
+        <p className="product-card__name">{name}</p>
         <div className="product-card__row">
           <span className="product-card__price">
             ${price.toFixed(2)}
@@ -55,7 +57,7 @@ export default function ProductCard({
               aria-label={
                 soldOut
                   ? t("product_card.sold_out_aria")
-                  : `${t("product_card.add_to_cart")}: ${product.name}`
+                  : `${t("product_card.add_to_cart")}: ${name}`
               }
             >
               +

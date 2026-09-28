@@ -4,6 +4,7 @@ import type { CategoryId } from "../data/categories";
 export interface ApiVariant {
   id: string;
   name: string;
+  name_en: string | null;
   price: string;
   stock_quantity: number;
 }
@@ -11,7 +12,9 @@ export interface ApiVariant {
 export interface ApiProduct {
   id: string;
   name: string;
+  name_en: string | null;
   description: string | null;
+  description_en: string | null;
   price: string;
   old_price: string | null;
   stock_quantity: number;

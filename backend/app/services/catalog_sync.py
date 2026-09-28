@@ -11,6 +11,7 @@ from sqlalchemy import select
 from sqlalchemy.orm import Session
 
 from app.models.product import Product, ProductVariant
+from app.services.translate import translate_html, translate_text
 
 # Pisell's free-text Chinese category names -> our storefront's CategoryId.
 # "deals" isn't a real Pisell category; discounted items are detected from
@@ -90,6 +91,22 @@ class ProductInput:
     variants: list[VariantInput] = field(default_factory=list)
 
 
+def _resolve_translation(
+    new_text: str | None,
+    old_source_text: str | None,
+    old_translation: str | None,
+    translator,
+) -> str | None:
+    """Re-translates only when the source text changed, or the previous
+    attempt never produced anything (e.g. it hit a rate limit last time) —
+    keeps re-imports cheap on the free translation tier."""
+    if not new_text:
+        return None
+    if new_text == old_source_text and old_translation:
+        return old_translation
+    return translator(new_text)
+
+
 def _sync_variants(product: Product, variants: list[VariantInput], external_source: str) -> None:
     existing_by_external_id = {v.external_id: v for v in product.variants if v.external_id}
     seen_external_ids: set[str] = set()
@@ -98,7 +115,11 @@ def _sync_variants(product: Product, variants: list[VariantInput], external_sour
         seen_external_ids.add(v.external_id)
         existing = existing_by_external_id.get(v.external_id)
         if existing:
+            name_en = _resolve_translation(
+                v.name, existing.name, existing.name_en, translate_text
+            )
             existing.name = v.name
+            existing.name_en = name_en
             existing.price = v.price
             existing.stock_quantity = v.stock_quantity
             existing.sort = v.sort
@@ -109,6 +130,7 @@ def _sync_variants(product: Product, variants: list[VariantInput], external_sour
                     external_source=external_source,
                     external_id=v.external_id,
                     name=v.name,
+                    name_en=translate_text(v.name),
                     price=v.price,
                     stock_quantity=v.stock_quantity,
                     sort=v.sort,
@@ -131,8 +153,29 @@ def upsert_product(db: Session, item: ProductInput) -> bool:
         else None
     )
 
+    existing = db.scalar(
+        select(Product).where(
+            Product.external_source == item.external_source,
+            Product.external_id == item.external_id,
+        )
+    )
+
+    name_en = _resolve_translation(
+        item.name,
+        existing.name if existing else None,
+        existing.name_en if existing else None,
+        translate_text,
+    )
+    description_en = _resolve_translation(
+        item.description,
+        existing.description if existing else None,
+        existing.description_en if existing else None,
+        translate_html,
+    )
+
     fields = dict(
         name=item.name,
+        name_en=name_en,
         price=item.price,
         old_price=old_price,
         stock_quantity=item.stock_quantity,
@@ -140,15 +183,10 @@ def upsert_product(db: Session, item: ProductInput) -> bool:
         vendor=item.vendor,
         image_url=item.image_url,
         description=item.description,
+        description_en=description_en,
         is_active=item.is_active,
     )
 
-    existing = db.scalar(
-        select(Product).where(
-            Product.external_source == item.external_source,
-            Product.external_id == item.external_id,
-        )
-    )
     if existing:
         for key, value in fields.items():
             setattr(existing, key, value)

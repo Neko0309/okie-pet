@@ -2,6 +2,7 @@ import { useMemo, useState } from "react";
 import { useTranslation } from "react-i18next";
 import DOMPurify from "dompurify";
 import type { ApiProduct, ApiVariant } from "../lib/products";
+import { localize } from "../lib/localize";
 import "./AddToCartModal.css";
 
 export default function AddToCartModal({
@@ -13,12 +14,16 @@ export default function AddToCartModal({
   onClose: () => void;
   onConfirm: (variant: ApiVariant | null, quantity: number) => void;
 }) {
-  const { t } = useTranslation();
+  const { t, i18n } = useTranslation();
   const hasVariants = product.variants.length > 0;
+  const lang = i18n.language;
+
+  const name = localize(lang, product.name, product.name_en);
+  const description = localize(lang, product.description ?? "", product.description_en) || null;
 
   const cleanDescription = useMemo(
-    () => (product.description ? DOMPurify.sanitize(product.description) : null),
-    [product.description],
+    () => (description ? DOMPurify.sanitize(description) : null),
+    [description],
   );
 
   const [selectedVariantId, setSelectedVariantId] = useState(() => {
@@ -54,7 +59,7 @@ export default function AddToCartModal({
         className="add-modal"
         role="dialog"
         aria-modal="true"
-        aria-label={product.name}
+        aria-label={name}
         onClick={(e) => e.stopPropagation()}
       >
         <button
@@ -69,13 +74,13 @@ export default function AddToCartModal({
         <div className="add-modal__head">
           <div className="add-modal__image">
             {product.image_url ? (
-              <img src={product.image_url} alt={product.name} />
+              <img src={product.image_url} alt={name} />
             ) : (
               <span aria-hidden="true">🐾</span>
             )}
           </div>
           <div>
-            <p className="add-modal__name">{product.name}</p>
+            <p className="add-modal__name">{name}</p>
             <p className="add-modal__price">${price.toFixed(2)}</p>
           </div>
         </div>
@@ -112,7 +117,7 @@ export default function AddToCartModal({
                     }}
                   >
                     <span className="add-modal__option-name">
-                      {v.name}
+                      {localize(lang, v.name, v.name_en)}
                       {optionSoldOut ? ` (${t("product_card.stamp_sold_out")})` : ""}
                     </span>
                     <span className="add-modal__option-price">
@@ -131,7 +136,14 @@ export default function AddToCartModal({
             <button type="button" onClick={() => clampQuantity(quantity - 1)}>
               −
             </button>
-            <span>{quantity}</span>
+            <input
+              type="number"
+              inputMode="numeric"
+              min={1}
+              max={Math.max(1, availableStock)}
+              value={quantity}
+              onChange={(e) => clampQuantity(Number(e.target.value) || 1)}
+            />
             <button type="button" onClick={() => clampQuantity(quantity + 1)}>
               +
             </button>

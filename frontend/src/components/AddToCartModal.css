@@ -150,11 +150,23 @@
   justify-content: center;
 }
 
-.add-modal__qty span {
-  min-width: 24px;
+.add-modal__qty input {
+  width: 52px;
+  height: 32px;
+  border: 1.5px solid var(--color-card-line);
+  border-radius: 8px;
   text-align: center;
   font-family: var(--font-latin);
   font-size: 15px;
+  color: var(--color-ink);
+  background: var(--color-surface);
+  -moz-appearance: textfield;
+}
+
+.add-modal__qty input::-webkit-outer-spin-button,
+.add-modal__qty input::-webkit-inner-spin-button {
+  -webkit-appearance: none;
+  margin: 0;
 }
 
 .add-modal__confirm {

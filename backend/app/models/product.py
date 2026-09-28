@@ -34,7 +34,9 @@ class Product(Base):
     external_id: Mapped[str | None] = mapped_column(String(100), index=True, nullable=True)
 
     name: Mapped[str] = mapped_column(String(255))
+    name_en: Mapped[str | None] = mapped_column(String(255), nullable=True)
     description: Mapped[str | None] = mapped_column(Text, nullable=True)
+    description_en: Mapped[str | None] = mapped_column(Text, nullable=True)
     price: Mapped[Decimal] = mapped_column(Numeric(10, 2))
     old_price: Mapped[Decimal | None] = mapped_column(Numeric(10, 2), nullable=True)
     stock_quantity: Mapped[int] = mapped_column(Integer, default=0)
@@ -85,6 +87,7 @@ class ProductVariant(Base):
     # e.g. "43g" or "单个 · 柿柿如意" (size · flavor, joined when a product
     # has more than one option dimension)
     name: Mapped[str] = mapped_column(String(255))
+    name_en: Mapped[str | None] = mapped_column(String(255), nullable=True)
     price: Mapped[Decimal] = mapped_column(Numeric(10, 2))
     stock_quantity: Mapped[int] = mapped_column(Integer, default=0)
     sort: Mapped[int] = mapped_column(Integer, default=0)

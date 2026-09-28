@@ -9,6 +9,7 @@ class VariantOut(BaseModel):
 
     id: uuid.UUID
     name: str
+    name_en: str | None
     price: Decimal
     stock_quantity: int
 
@@ -18,7 +19,9 @@ class ProductOut(BaseModel):
 
     id: uuid.UUID
     name: str
+    name_en: str | None
     description: str | None
+    description_en: str | None
     price: Decimal
     old_price: Decimal | None
     stock_quantity: int

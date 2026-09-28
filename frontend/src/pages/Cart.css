@@ -133,10 +133,23 @@
   justify-content: center;
 }
 
-.cart-row__qty span {
-  min-width: 18px;
+.cart-row__qty input {
+  width: 44px;
+  height: 26px;
+  border: 1.5px solid var(--color-card-line);
+  border-radius: 7px;
   text-align: center;
   font-family: var(--font-latin);
+  font-size: 13px;
+  color: var(--color-ink);
+  background: var(--color-surface);
+  -moz-appearance: textfield;
+}
+
+.cart-row__qty input::-webkit-outer-spin-button,
+.cart-row__qty input::-webkit-inner-spin-button {
+  -webkit-appearance: none;
+  margin: 0;
 }
 
 .cart-row__price {
