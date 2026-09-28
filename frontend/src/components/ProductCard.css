@@ -84,16 +84,6 @@
   font-size: 13px;
 }
 
-.product-card__variant-select {
-  width: 100%;
-  border: 1.5px solid var(--color-card-line);
-  border-radius: 9px;
-  padding: 5px 8px;
-  font-size: 12px;
-  color: var(--color-ink);
-  background: var(--color-surface-2);
-}
-
 .product-card__row {
   display: flex;
   align-items: center;

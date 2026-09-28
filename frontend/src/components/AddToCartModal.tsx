@@ -1,0 +1,138 @@
+import { useState } from "react";
+import { useTranslation } from "react-i18next";
+import type { ApiProduct, ApiVariant } from "../lib/products";
+import "./AddToCartModal.css";
+
+export default function AddToCartModal({
+  product,
+  onClose,
+  onConfirm,
+}: {
+  product: ApiProduct;
+  onClose: () => void;
+  onConfirm: (variant: ApiVariant | null, quantity: number) => void;
+}) {
+  const { t } = useTranslation();
+  const hasVariants = product.variants.length > 0;
+
+  const [selectedVariantId, setSelectedVariantId] = useState(() => {
+    if (!hasVariants) return null;
+    const firstInStock = product.variants.find((v) => v.stock_quantity > 0);
+    return (firstInStock ?? product.variants[0]).id;
+  });
+  const [quantity, setQuantity] = useState(1);
+
+  const selectedVariant = hasVariants
+    ? (product.variants.find((v) => v.id === selectedVariantId) ?? null)
+    : null;
+
+  const price = Number(selectedVariant ? selectedVariant.price : product.price);
+  const availableStock = selectedVariant
+    ? selectedVariant.stock_quantity
+    : product.stock_quantity;
+  const soldOut = hasVariants ? !selectedVariant || availableStock <= 0 : availableStock <= 0;
+
+  function clampQuantity(next: number) {
+    const max = Math.max(1, availableStock);
+    setQuantity(Math.min(Math.max(1, next), max));
+  }
+
+  function handleConfirm() {
+    if (soldOut) return;
+    onConfirm(selectedVariant, quantity);
+  }
+
+  return (
+    <div className="add-modal-scrim" onClick={onClose}>
+      <div
+        className="add-modal"
+        role="dialog"
+        aria-modal="true"
+        aria-label={product.name}
+        onClick={(e) => e.stopPropagation()}
+      >
+        <button
+          type="button"
+          className="add-modal__close"
+          onClick={onClose}
+          aria-label={t("add_modal.close")}
+        >
+          ✕
+        </button>
+
+        <div className="add-modal__head">
+          <div className="add-modal__image">
+            {product.image_url ? (
+              <img src={product.image_url} alt={product.name} />
+            ) : (
+              <span aria-hidden="true">🐾</span>
+            )}
+          </div>
+          <div>
+            <p className="add-modal__name">{product.name}</p>
+            <p className="add-modal__price">${price.toFixed(2)}</p>
+          </div>
+        </div>
+
+        {hasVariants && (
+          <div className="add-modal__section">
+            <p className="add-modal__label">{t("add_modal.choose_option")}</p>
+            <div className="add-modal__options">
+              {product.variants.map((v) => {
+                const optionSoldOut = v.stock_quantity <= 0;
+                return (
+                  <button
+                    key={v.id}
+                    type="button"
+                    className={
+                      "add-modal__option" +
+                      (v.id === selectedVariantId ? " is-selected" : "") +
+                      (optionSoldOut ? " is-disabled" : "")
+                    }
+                    disabled={optionSoldOut}
+                    onClick={() => {
+                      setSelectedVariantId(v.id);
+                      setQuantity(1);
+                    }}
+                  >
+                    <span className="add-modal__option-name">
+                      {v.name}
+                      {optionSoldOut ? ` (${t("product_card.stamp_sold_out")})` : ""}
+                    </span>
+                    <span className="add-modal__option-price">
+                      ${Number(v.price).toFixed(2)}
+                    </span>
+                  </button>
+                );
+              })}
+            </div>
+          </div>
+        )}
+
+        <div className="add-modal__section">
+          <p className="add-modal__label">{t("add_modal.quantity")}</p>
+          <div className="add-modal__qty">
+            <button type="button" onClick={() => clampQuantity(quantity - 1)}>
+              −
+            </button>
+            <span>{quantity}</span>
+            <button type="button" onClick={() => clampQuantity(quantity + 1)}>
+              +
+            </button>
+          </div>
+        </div>
+
+        <button
+          type="button"
+          className="add-modal__confirm"
+          disabled={soldOut}
+          onClick={handleConfirm}
+        >
+          {soldOut
+            ? t("product_card.stamp_sold_out")
+            : `${t("add_modal.confirm")} · $${(price * quantity).toFixed(2)}`}
+        </button>
+      </div>
+    </div>
+  );
+}

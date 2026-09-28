@@ -39,6 +39,12 @@
     "add_to_cart": "Add to cart",
     "sold_out_aria": "Sold out"
   },
+  "add_modal": {
+    "choose_option": "Choose an option",
+    "quantity": "Quantity",
+    "confirm": "Add to cart",
+    "close": "Close"
+  },
   "cart": {
     "empty_title": "Your cart is empty",
     "empty_sub": "See what's new in the shop",

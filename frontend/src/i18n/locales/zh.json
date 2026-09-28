@@ -39,6 +39,12 @@
     "add_to_cart": "加入购物车",
     "sold_out_aria": "已售罄"
   },
+  "add_modal": {
+    "choose_option": "选规格",
+    "quantity": "数量",
+    "confirm": "加入购物车",
+    "close": "关闭"
+  },
   "cart": {
     "empty_title": "购物车还是空的",
     "empty_sub": "看看有什么新鲜好物吧",

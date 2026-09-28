@@ -40,15 +40,18 @@ export default function Products() {
     setSortMode(SORT_CYCLE[(idx + 1) % SORT_CYCLE.length]);
   }
 
-  function handleAdd(product: ApiProduct, variant: ApiVariant | null) {
-    addItem({
-      productId: product.id,
-      variantId: variant?.id ?? null,
-      name: product.name,
-      variantName: variant?.name ?? null,
-      price: Number(variant ? variant.price : product.price),
-      image: product.image_url,
-    });
+  function handleAdd(product: ApiProduct, variant: ApiVariant | null, quantity: number) {
+    addItem(
+      {
+        productId: product.id,
+        variantId: variant?.id ?? null,
+        name: product.name,
+        variantName: variant?.name ?? null,
+        price: Number(variant ? variant.price : product.price),
+        image: product.image_url,
+      },
+      quantity,
+    );
   }
 
   return (
