@@ -1,9 +1,13 @@
 import { Link, NavLink } from "react-router-dom";
+import { useTranslation } from "react-i18next";
 import SearchBar from "./SearchBar";
+import LanguageSwitcher from "./LanguageSwitcher";
 import { CATEGORIES } from "../data/categories";
 import "./TopNav.css";
 
 export default function TopNav() {
+  const { t } = useTranslation();
+
   return (
     <>
       <header className="top-nav">
@@ -18,6 +22,7 @@ export default function TopNav() {
           </div>
 
           <div className="top-nav__actions">
+            <LanguageSwitcher />
             <NavLink
               to="/account"
               className={({ isActive }) =>
@@ -25,7 +30,7 @@ export default function TopNav() {
               }
             >
               <UserIcon />
-              <span className="top-nav__icon-label">个人中心</span>
+              <span className="top-nav__icon-label">{t("nav.account")}</span>
             </NavLink>
             <NavLink
               to="/cart"
@@ -34,28 +39,28 @@ export default function TopNav() {
               }
             >
               <CartIcon />
-              <span className="top-nav__icon-label">购物车</span>
+              <span className="top-nav__icon-label">{t("nav.cart")}</span>
               <span className="top-nav__badge">0</span>
             </NavLink>
           </div>
         </div>
       </header>
 
-      <nav className="cat-nav" aria-label="商品分类">
+      <nav className="cat-nav" aria-label={t("home.categories_title")}>
         <div className="cat-nav__inner container">
           <NavLink to="/" end className={({ isActive }) => (isActive ? "is-active" : "")}>
-            首页
+            {t("nav.home")}
           </NavLink>
           <NavLink
             to="/products"
             end
             className={({ isActive }) => (isActive ? "is-active" : "")}
           >
-            全部
+            {t("nav.all")}
           </NavLink>
           {CATEGORIES.map((c) => (
             <Link key={c.id} to={`/products?cat=${c.id}`}>
-              {c.label}
+              {t(`category.${c.id}`)}
             </Link>
           ))}
         </div>

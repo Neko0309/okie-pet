@@ -1,4 +1,5 @@
 import { Link } from "react-router-dom";
+import { useTranslation } from "react-i18next";
 import CategoryTile from "../components/CategoryTile";
 import ProductCard from "../components/ProductCard";
 import { CATEGORIES } from "../data/categories";
@@ -6,27 +7,27 @@ import { MOCK_PRODUCTS } from "../data/mockProducts";
 import "./Home.css";
 
 export default function Home() {
+  const { t } = useTranslation();
+
   return (
     <div className="home">
       <div className="container">
         <div className="home__ribbon">
-          <span>🚚 全澳满 $169 包邮</span>
-          <span>⚡ 墨尔本当日配送</span>
+          <span>{t("home.ribbon_shipping")}</span>
+          <span>{t("home.ribbon_delivery")}</span>
         </div>
       </div>
 
       <section className="home__hero container">
         <div>
           <h1 className="home__hero-title">
-            给毛孩子的
+            {t("home.hero_title_line1")}
             <br />
-            每日小确幸
+            {t("home.hero_title_line2")}
           </h1>
-          <p className="home__hero-sub">
-            冻干、主粮、罐头和日常用品,我们一件件挑过。墨尔本下午前下单,当天就能送到家门口。
-          </p>
+          <p className="home__hero-sub">{t("home.hero_sub")}</p>
           <Link to="/products" className="home__hero-cta">
-            逛逛全部商品
+            {t("home.hero_cta")}
           </Link>
         </div>
         <div className="home__hero-art" aria-hidden="true">
@@ -36,7 +37,7 @@ export default function Home() {
 
       <div className="container">
         <div className="plaque">
-          <h2>店铺分类</h2>
+          <h2>{t("home.categories_title")}</h2>
           <div className="doodle" />
         </div>
         <div className="home__categories">
@@ -48,7 +49,7 @@ export default function Home() {
 
       <div className="container">
         <div className="plaque">
-          <h2>热门产品</h2>
+          <h2>{t("home.hot_products_title")}</h2>
           <div className="doodle" />
         </div>
         <div className="home__product-grid">

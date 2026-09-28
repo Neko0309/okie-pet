@@ -1,0 +1,26 @@
+.lang-switch {
+  display: flex;
+  align-items: center;
+  gap: 2px;
+  background: var(--color-surface);
+  border-radius: 999px;
+  padding: 3px;
+  flex: none;
+}
+
+.lang-switch button {
+  border: none;
+  background: none;
+  padding: 6px 12px;
+  border-radius: 999px;
+  font-size: 13px;
+  font-family: var(--font-latin);
+  color: var(--color-ink-muted);
+  line-height: 1;
+}
+
+.lang-switch button.is-active {
+  background: var(--color-accent);
+  color: #fff;
+  font-weight: 600;
+}

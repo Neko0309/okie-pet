@@ -1,10 +1,12 @@
+import { useTranslation } from "react-i18next";
 import "./SearchBar.css";
 
 export default function SearchBar({
-  placeholder = "搜索宠物用品",
+  placeholder,
 }: {
   placeholder?: string;
 }) {
+  const { t } = useTranslation();
   return (
     <div className="search-bar">
       <svg viewBox="0 0 24 24" width="17" height="17" fill="none">
@@ -16,7 +18,7 @@ export default function SearchBar({
           strokeLinecap="round"
         />
       </svg>
-      <input type="text" placeholder={placeholder} />
+      <input type="text" placeholder={placeholder ?? t("common.search_placeholder")} />
     </div>
   );
 }

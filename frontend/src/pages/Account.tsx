@@ -1,18 +1,21 @@
 import { useState, type FormEvent } from "react";
+import { useTranslation } from "react-i18next";
 import { useAuth } from "../lib/auth";
 import "./Account.css";
 
 export default function Account() {
+  const { t } = useTranslation();
   const { user, loading } = useAuth();
 
   if (loading) {
-    return <div className="account account--centered">加载中…</div>;
+    return <div className="account account--centered">{t("account.loading")}</div>;
   }
 
   return user ? <ProfileCard /> : <AuthForm />;
 }
 
 function ProfileCard() {
+  const { t } = useTranslation();
   const { user, logout } = useAuth();
   if (!user) return null;
   return (
@@ -21,17 +24,18 @@ function ProfileCard() {
         <div className="account__avatar">{user.full_name.slice(0, 1)}</div>
         <p className="account__name">{user.full_name}</p>
         <p className="account__email">{user.email}</p>
-        {user.is_admin && <span className="account__badge">管理员</span>}
+        {user.is_admin && <span className="account__badge">{t("account.admin_badge")}</span>}
       </div>
       <button type="button" className="account__logout" onClick={logout}>
-        退出登录
+        {t("account.logout")}
       </button>
     </div>
   );
 }
 
 function AuthForm() {
-  const { login, register, error } = useAuth();
+  const { t } = useTranslation();
+  const { login, register, errorKey, errorDetail } = useAuth();
   const [mode, setMode] = useState<"login" | "register">("login");
   const [email, setEmail] = useState("");
   const [password, setPassword] = useState("");
@@ -48,11 +52,13 @@ function AuthForm() {
         await register(email, password, fullName);
       }
     } catch {
-      // error surfaced via useAuth().error
+      // error surfaced via useAuth().errorKey / errorDetail
     } finally {
       setSubmitting(false);
     }
   }
+
+  const errorMessage = errorDetail ?? (errorKey ? t(errorKey) : null);
 
   return (
     <div className="account account--centered">
@@ -63,14 +69,14 @@ function AuthForm() {
             className={mode === "login" ? "is-active" : ""}
             onClick={() => setMode("login")}
           >
-            登录
+            {t("account.login")}
           </button>
           <button
             type="button"
             className={mode === "register" ? "is-active" : ""}
             onClick={() => setMode("register")}
           >
-            注册
+            {t("account.register")}
           </button>
         </div>
 
@@ -78,7 +84,7 @@ function AuthForm() {
           {mode === "register" && (
             <input
               type="text"
-              placeholder="昵称"
+              placeholder={t("account.nickname_placeholder")}
               value={fullName}
               onChange={(e) => setFullName(e.target.value)}
               required
@@ -86,22 +92,26 @@ function AuthForm() {
           )}
           <input
             type="email"
-            placeholder="邮箱"
+            placeholder={t("account.email_placeholder")}
             value={email}
             onChange={(e) => setEmail(e.target.value)}
             required
           />
           <input
             type="password"
-            placeholder="密码"
+            placeholder={t("account.password_placeholder")}
             value={password}
             onChange={(e) => setPassword(e.target.value)}
             required
             minLength={8}
           />
-          {error && <p className="auth-card__error">{error}</p>}
+          {errorMessage && <p className="auth-card__error">{errorMessage}</p>}
           <button type="submit" className="auth-card__submit" disabled={submitting}>
-            {submitting ? "请稍候…" : mode === "login" ? "登录" : "注册"}
+            {submitting
+              ? t("account.submitting")
+              : mode === "login"
+                ? t("account.login")
+                : t("account.register")}
           </button>
         </form>
       </div>

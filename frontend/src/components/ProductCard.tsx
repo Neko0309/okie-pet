@@ -1,3 +1,4 @@
+import { useTranslation } from "react-i18next";
 import type { Product } from "../data/mockProducts";
 import ProductArt from "./ProductArt";
 import "./ProductCard.css";
@@ -11,6 +12,8 @@ export default function ProductCard({
   compact?: boolean;
   onAdd?: (product: Product) => void;
 }) {
+  const { t } = useTranslation();
+
   return (
     <div className={"product-card" + (compact ? " is-compact" : "")}>
       <div className="product-card__image">
@@ -20,10 +23,12 @@ export default function ProductCard({
           label={product.label}
           name={product.name}
         />
-        {product.discount && <span className="product-card__tag">折扣</span>}
+        {product.discount && (
+          <span className="product-card__tag">{t("product_card.tag_discount")}</span>
+        )}
         {product.soldOut && (
           <div className="product-card__stamp">
-            <b>已售罄</b>
+            <b>{t("product_card.stamp_sold_out")}</b>
           </div>
         )}
       </div>
@@ -45,7 +50,9 @@ export default function ProductCard({
               disabled={product.soldOut}
               onClick={() => onAdd?.(product)}
               aria-label={
-                product.soldOut ? "已售罄" : `把 ${product.name} 加入购物车`
+                product.soldOut
+                  ? t("product_card.sold_out_aria")
+                  : `${t("product_card.add_to_cart")}: ${product.name}`
               }
             >
               +

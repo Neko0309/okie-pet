@@ -17,7 +17,10 @@ interface User {
 interface AuthContextValue {
   user: User | null;
   loading: boolean;
-  error: string | null;
+  /** i18next translation key for a client-side error (no server detail available) */
+  errorKey: string | null;
+  /** raw detail message from the API, if the server provided one (not localized) */
+  errorDetail: string | null;
   login: (email: string, password: string) => Promise<void>;
   register: (email: string, password: string, fullName: string) => Promise<void>;
   logout: () => void;
@@ -30,7 +33,8 @@ const TOKEN_KEY = "okiepet_token";
 export function AuthProvider({ children }: { children: ReactNode }) {
   const [user, setUser] = useState<User | null>(null);
   const [loading, setLoading] = useState(true);
-  const [error, setError] = useState<string | null>(null);
+  const [errorKey, setErrorKey] = useState<string | null>(null);
+  const [errorDetail, setErrorDetail] = useState<string | null>(null);
 
   async function loadUser() {
     const token = localStorage.getItem(TOKEN_KEY);
@@ -55,7 +59,8 @@ export function AuthProvider({ children }: { children: ReactNode }) {
   }, []);
 
   async function login(email: string, password: string) {
-    setError(null);
+    setErrorKey(null);
+    setErrorDetail(null);
     try {
       const body = new URLSearchParams({ username: email, password });
       const res = await api.post<{ access_token: string }>("/auth/login", body, {
@@ -64,13 +69,14 @@ export function AuthProvider({ children }: { children: ReactNode }) {
       localStorage.setItem(TOKEN_KEY, res.data.access_token);
       await loadUser();
     } catch {
-      setError("邮箱或密码不对");
+      setErrorKey("account.error_login");
       throw new Error("login failed");
     }
   }
 
   async function register(email: string, password: string, fullName: string) {
-    setError(null);
+    setErrorKey(null);
+    setErrorDetail(null);
     try {
       await api.post("/auth/register", {
         email,
@@ -79,7 +85,12 @@ export function AuthProvider({ children }: { children: ReactNode }) {
       });
       await login(email, password);
     } catch (e: any) {
-      setError(e?.response?.data?.detail ?? "注册失败,请重试");
+      const detail = e?.response?.data?.detail;
+      if (typeof detail === "string") {
+        setErrorDetail(detail);
+      } else {
+        setErrorKey("account.error_register_default");
+      }
       throw e;
     }
   }
@@ -90,7 +101,9 @@ export function AuthProvider({ children }: { children: ReactNode }) {
   }
 
   return (
-    <AuthContext.Provider value={{ user, loading, error, login, register, logout }}>
+    <AuthContext.Provider
+      value={{ user, loading, errorKey, errorDetail, login, register, logout }}
+    >
       {children}
     </AuthContext.Provider>
   );

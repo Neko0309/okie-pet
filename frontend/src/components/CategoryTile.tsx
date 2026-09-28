@@ -1,4 +1,5 @@
 import type { ReactNode } from "react";
+import { useTranslation } from "react-i18next";
 import type { Category } from "../data/categories";
 import "./CategoryTile.css";
 
@@ -106,6 +107,7 @@ const ICONS: Record<string, ReactNode> = {
 };
 
 export default function CategoryTile({ category }: { category: Category }) {
+  const { t } = useTranslation();
   return (
     <button className="category-tile" type="button">
       <div className="category-tile__blob">
@@ -118,7 +120,7 @@ export default function CategoryTile({ category }: { category: Category }) {
           {ICONS[category.id]}
         </svg>
       </div>
-      <span className="category-tile__label">{category.label}</span>
+      <span className="category-tile__label">{t(`category.${category.id}`)}</span>
     </button>
   );
 }

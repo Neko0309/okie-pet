@@ -1,0 +1,73 @@
+{
+  "common": {
+    "search_placeholder": "搜索宠物用品"
+  },
+  "nav": {
+    "home": "首页",
+    "all": "全部",
+    "account": "个人中心",
+    "cart": "购物车"
+  },
+  "category": {
+    "freeze-dried": "冻干",
+    "supplies": "用品",
+    "canned": "罐头",
+    "staple": "主粮",
+    "snacks": "零食",
+    "deals": "折扣"
+  },
+  "home": {
+    "ribbon_shipping": "🚚 全澳满 $169 包邮",
+    "ribbon_delivery": "⚡ 墨尔本当日配送",
+    "hero_title_line1": "给毛孩子的",
+    "hero_title_line2": "每日小确幸",
+    "hero_sub": "冻干、主粮、罐头和日常用品,我们一件件挑过。墨尔本下午前下单,当天就能送到家门口。",
+    "hero_cta": "逛逛全部商品",
+    "categories_title": "店铺分类",
+    "hot_products_title": "热门产品"
+  },
+  "products": {
+    "sort_label": "排序：",
+    "sort_recommended": "推荐",
+    "sort_price_asc": "价格 ↑",
+    "sort_price_desc": "价格 ↓",
+    "empty": "这个分类还没有商品"
+  },
+  "product_card": {
+    "tag_discount": "折扣",
+    "stamp_sold_out": "已售罄",
+    "add_to_cart": "加入购物车",
+    "sold_out_aria": "已售罄"
+  },
+  "cart": {
+    "empty_title": "购物车还是空的",
+    "empty_sub": "看看有什么新鲜好物吧",
+    "cta": "去逛逛"
+  },
+  "account": {
+    "login": "登录",
+    "register": "注册",
+    "email_placeholder": "邮箱",
+    "password_placeholder": "密码",
+    "nickname_placeholder": "昵称",
+    "submitting": "请稍候…",
+    "logout": "退出登录",
+    "admin_badge": "管理员",
+    "loading": "加载中…",
+    "error_login": "邮箱或密码不对",
+    "error_register_default": "注册失败,请重试"
+  },
+  "footer": {
+    "brand_desc": "墨尔本本地宠物用品小店,专注猫狗的吃喝玩乐。",
+    "delivery_title": "配送",
+    "shipping_free": "全澳满 $169 包邮",
+    "same_day": "墨尔本当日配送",
+    "contact_title": "联系我们",
+    "email_label": "邮箱：",
+    "hours_label": "营业时间：每天 10:00–19:00"
+  },
+  "language": {
+    "zh": "中文",
+    "en": "EN"
+  }
+}

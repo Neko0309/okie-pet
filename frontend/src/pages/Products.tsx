@@ -1,5 +1,6 @@
 import { useMemo, useState } from "react";
 import { useSearchParams } from "react-router-dom";
+import { useTranslation } from "react-i18next";
 import ProductCard from "../components/ProductCard";
 import { CATEGORIES, type CategoryId } from "../data/categories";
 import { MOCK_PRODUCTS } from "../data/mockProducts";
@@ -7,21 +8,22 @@ import "./Products.css";
 
 type SortMode = "recommended" | "price-asc" | "price-desc";
 
-const SORT_LABELS: Record<SortMode, string> = {
-  recommended: "推荐",
-  "price-asc": "价格 ↑",
-  "price-desc": "价格 ↓",
-};
-
 const SORT_CYCLE: SortMode[] = ["recommended", "price-asc", "price-desc"];
 
 export default function Products() {
+  const { t } = useTranslation();
   const [searchParams] = useSearchParams();
   const initialCategory = searchParams.get("cat") as CategoryId | null;
   const [activeCategory, setActiveCategory] = useState<CategoryId | "all">(
     initialCategory ?? "all",
   );
   const [sortMode, setSortMode] = useState<SortMode>("recommended");
+
+  const SORT_LABELS: Record<SortMode, string> = {
+    recommended: t("products.sort_recommended"),
+    "price-asc": t("products.sort_price_asc"),
+    "price-desc": t("products.sort_price_desc"),
+  };
 
   const products = useMemo(() => {
     let list = MOCK_PRODUCTS;
@@ -52,7 +54,7 @@ export default function Products() {
             className={"products__tab" + (activeCategory === "all" ? " is-active" : "")}
             onClick={() => setActiveCategory("all")}
           >
-            全部
+            {t("nav.all")}
           </button>
           {CATEGORIES.map((c) => (
             <button
@@ -61,12 +63,13 @@ export default function Products() {
               className={"products__tab" + (activeCategory === c.id ? " is-active" : "")}
               onClick={() => setActiveCategory(c.id)}
             >
-              {c.label}
+              {t(`category.${c.id}`)}
             </button>
           ))}
         </div>
         <button type="button" className="products__sort" onClick={cycleSort}>
-          排序：{SORT_LABELS[sortMode]}
+          {t("products.sort_label")}
+          {SORT_LABELS[sortMode]}
         </button>
       </header>
 
@@ -75,7 +78,7 @@ export default function Products() {
           <ProductCard key={p.id} product={p} />
         ))}
         {products.length === 0 && (
-          <p className="products__empty">这个分类还没有商品</p>
+          <p className="products__empty">{t("products.empty")}</p>
         )}
       </div>
     </div>

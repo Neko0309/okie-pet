@@ -1,0 +1,73 @@
+{
+  "common": {
+    "search_placeholder": "Search pet supplies"
+  },
+  "nav": {
+    "home": "Home",
+    "all": "All",
+    "account": "Account",
+    "cart": "Cart"
+  },
+  "category": {
+    "freeze-dried": "Freeze-dried",
+    "supplies": "Supplies",
+    "canned": "Canned",
+    "staple": "Staple food",
+    "snacks": "Snacks",
+    "deals": "Deals"
+  },
+  "home": {
+    "ribbon_shipping": "🚚 Free shipping over $169, AU-wide",
+    "ribbon_delivery": "⚡ Same-day delivery in Melbourne",
+    "hero_title_line1": "Daily little joys",
+    "hero_title_line2": "for your fur babies",
+    "hero_sub": "Freeze-dried treats, staple food, canned meals and daily supplies — every item hand-picked. Order before the afternoon cutoff and we'll deliver to your Melbourne door the same day.",
+    "hero_cta": "Browse all products",
+    "categories_title": "Shop by category",
+    "hot_products_title": "Popular picks"
+  },
+  "products": {
+    "sort_label": "Sort: ",
+    "sort_recommended": "Recommended",
+    "sort_price_asc": "Price ↑",
+    "sort_price_desc": "Price ↓",
+    "empty": "No products in this category yet"
+  },
+  "product_card": {
+    "tag_discount": "Sale",
+    "stamp_sold_out": "Sold out",
+    "add_to_cart": "Add to cart",
+    "sold_out_aria": "Sold out"
+  },
+  "cart": {
+    "empty_title": "Your cart is empty",
+    "empty_sub": "See what's new in the shop",
+    "cta": "Browse products"
+  },
+  "account": {
+    "login": "Log in",
+    "register": "Sign up",
+    "email_placeholder": "Email",
+    "password_placeholder": "Password",
+    "nickname_placeholder": "Nickname",
+    "submitting": "Please wait…",
+    "logout": "Log out",
+    "admin_badge": "Admin",
+    "loading": "Loading…",
+    "error_login": "Wrong email or password",
+    "error_register_default": "Registration failed, please try again"
+  },
+  "footer": {
+    "brand_desc": "A Melbourne-based pet supplies shop for cats and dogs.",
+    "delivery_title": "Delivery",
+    "shipping_free": "Free shipping over $169, AU-wide",
+    "same_day": "Same-day delivery in Melbourne",
+    "contact_title": "Contact",
+    "email_label": "Email: ",
+    "hours_label": "Hours: every day 10:00am–7:00pm"
+  },
+  "language": {
+    "zh": "中文",
+    "en": "EN"
+  }
+}
