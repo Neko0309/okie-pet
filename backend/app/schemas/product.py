@@ -18,6 +18,7 @@ class ProductOut(BaseModel):
 
     id: uuid.UUID
     name: str
+    description: str | None
     price: Decimal
     old_price: Decimal | None
     stock_quantity: int

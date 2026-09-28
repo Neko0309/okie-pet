@@ -40,6 +40,7 @@
     "sold_out_aria": "Sold out"
   },
   "add_modal": {
+    "details": "Details",
     "choose_option": "Choose an option",
     "quantity": "Quantity",
     "confirm": "Add to cart",

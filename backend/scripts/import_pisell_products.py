@@ -112,6 +112,7 @@ def to_product_input(raw: dict) -> ProductInput:
         category_names=[c.get("name") for c in category_list if c.get("name")],
         vendor=vendor_list[0]["name"] if vendor_list else None,
         image_url=raw.get("cover") or None,
+        description=raw.get("description") or None,
         is_active=raw.get("status") == "published",
         variants=variants,
     )

@@ -83,6 +83,7 @@ class ProductInput:
     category_names: list[str] = field(default_factory=list)
     vendor: str | None = None
     image_url: str | None = None
+    description: str | None = None
     original_price: Decimal | None = None
     is_active: bool = True
     external_source: str = "pisell"
@@ -138,6 +139,7 @@ def upsert_product(db: Session, item: ProductInput) -> bool:
         category=map_category(item.category_names),
         vendor=item.vendor,
         image_url=item.image_url,
+        description=item.description,
         is_active=item.is_active,
     )
 

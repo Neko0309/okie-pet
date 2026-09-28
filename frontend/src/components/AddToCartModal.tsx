@@ -1,5 +1,6 @@
-import { useState } from "react";
+import { useMemo, useState } from "react";
 import { useTranslation } from "react-i18next";
+import DOMPurify from "dompurify";
 import type { ApiProduct, ApiVariant } from "../lib/products";
 import "./AddToCartModal.css";
 
@@ -14,6 +15,11 @@ export default function AddToCartModal({
 }) {
   const { t } = useTranslation();
   const hasVariants = product.variants.length > 0;
+
+  const cleanDescription = useMemo(
+    () => (product.description ? DOMPurify.sanitize(product.description) : null),
+    [product.description],
+  );
 
   const [selectedVariantId, setSelectedVariantId] = useState(() => {
     if (!hasVariants) return null;
@@ -73,6 +79,16 @@ export default function AddToCartModal({
             <p className="add-modal__price">${price.toFixed(2)}</p>
           </div>
         </div>
+
+        {cleanDescription && (
+          <details className="add-modal__details">
+            <summary>{t("add_modal.details")}</summary>
+            <div
+              className="add-modal__details-body"
+              dangerouslySetInnerHTML={{ __html: cleanDescription }}
+            />
+          </details>
+        )}
 
         {hasVariants && (
           <div className="add-modal__section">

@@ -130,6 +130,7 @@ def build_products(rows: list[dict]) -> list[ProductInput]:
                 category_names=[category] if category else [],
                 vendor=parent.get("vendor"),
                 image_url=first_image(parent.get("image")),
+                description=parent.get("description") or None,
                 is_active=parent.get("status") == "published",
                 variants=variants,
             )

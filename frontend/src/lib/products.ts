@@ -11,6 +11,7 @@ export interface ApiVariant {
 export interface ApiProduct {
   id: string;
   name: string;
+  description: string | null;
   price: string;
   old_price: string | null;
   stock_quantity: number;
