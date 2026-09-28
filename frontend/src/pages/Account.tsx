@@ -30,6 +30,11 @@ function ProfileCard() {
       <Link to="/orders" className="account__orders-link">
         {t("nav.orders")}
       </Link>
+      {user.is_admin && (
+        <Link to="/admin" className="account__orders-link">
+          Admin
+        </Link>
+      )}
       <button type="button" className="account__logout" onClick={logout}>
         {t("account.logout")}
       </button>

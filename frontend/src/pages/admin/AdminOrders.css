@@ -1,0 +1,67 @@
+.admin-orders {
+  display: flex;
+  flex-direction: column;
+  gap: 14px;
+}
+
+.admin-orders__empty {
+  color: var(--color-ink-muted);
+  font-size: 13.5px;
+}
+
+.admin-order-card {
+  background: var(--color-surface);
+  border: 1px solid var(--color-card-line);
+  border-radius: 14px;
+  overflow: hidden;
+}
+
+.admin-order-card__head {
+  display: flex;
+  align-items: flex-start;
+  justify-content: space-between;
+  padding: 14px 16px;
+  background: var(--color-surface-2);
+}
+
+.admin-order-card__number {
+  font-family: var(--font-latin);
+  font-weight: 600;
+  font-size: 13px;
+  margin: 0 0 2px;
+}
+
+.admin-order-card__customer {
+  font-size: 12px;
+  color: var(--color-ink-muted);
+  margin: 0;
+}
+
+.admin-order-card__date {
+  font-size: 11px;
+  color: var(--color-ink-muted);
+  margin: 2px 0 0;
+}
+
+.admin-order-card__subtotal {
+  font-family: var(--font-latin);
+  font-weight: 700;
+  color: var(--color-price);
+  margin: 0;
+}
+
+.admin-order-card__items {
+  list-style: none;
+  margin: 0;
+  padding: 0;
+}
+
+.admin-order-card__items li {
+  display: flex;
+  justify-content: space-between;
+  gap: 12px;
+  padding: 8px 16px;
+  border-top: 1px solid var(--color-card-line);
+  font-size: 12.5px;
+  color: var(--color-ink);
+}

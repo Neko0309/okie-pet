@@ -8,6 +8,7 @@ from sqlalchemy.dialects.postgresql import UUID
 from sqlalchemy.orm import Mapped, mapped_column, relationship
 
 from app.core.database import Base
+from app.models.user import User  # noqa: F401 — referenced by the relationship() string
 
 
 def generate_order_number() -> str:
@@ -40,6 +41,7 @@ class Order(Base):
     items: Mapped[list["OrderItem"]] = relationship(
         back_populates="order", cascade="all, delete-orphan"
     )
+    user: Mapped["User"] = relationship()
 
 
 class OrderItem(Base):
