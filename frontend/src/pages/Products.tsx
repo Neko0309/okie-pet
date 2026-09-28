@@ -3,13 +3,15 @@ import { useSearchParams } from "react-router-dom";
 import { useTranslation } from "react-i18next";
 import ProductCard from "../components/ProductCard";
 import { CATEGORIES, type CategoryId } from "../data/categories";
-import { fetchProducts, type ApiProduct, type SortMode } from "../lib/products";
+import { fetchProducts, type ApiProduct, type ApiVariant, type SortMode } from "../lib/products";
+import { useCart } from "../lib/cart";
 import "./Products.css";
 
 const SORT_CYCLE: SortMode[] = ["recommended", "price-asc", "price-desc"];
 
 export default function Products() {
   const { t } = useTranslation();
+  const { addItem } = useCart();
   const [searchParams] = useSearchParams();
   const initialCategory = searchParams.get("cat") as CategoryId | null;
   const [activeCategory, setActiveCategory] = useState<CategoryId | "all">(
@@ -36,6 +38,17 @@ export default function Products() {
   function cycleSort() {
     const idx = SORT_CYCLE.indexOf(sortMode);
     setSortMode(SORT_CYCLE[(idx + 1) % SORT_CYCLE.length]);
+  }
+
+  function handleAdd(product: ApiProduct, variant: ApiVariant | null) {
+    addItem({
+      productId: product.id,
+      variantId: variant?.id ?? null,
+      name: product.name,
+      variantName: variant?.name ?? null,
+      price: Number(variant ? variant.price : product.price),
+      image: product.image_url,
+    });
   }
 
   return (
@@ -69,7 +82,7 @@ export default function Products() {
       {!loading && (
         <div className="products__grid">
           {products.map((p) => (
-            <ProductCard key={p.id} product={p} />
+            <ProductCard key={p.id} product={p} onAdd={handleAdd} />
           ))}
           {products.length === 0 && (
             <p className="products__empty">{t("products.empty")}</p>

@@ -1,6 +1,13 @@
 import { api } from "./api";
 import type { CategoryId } from "../data/categories";
 
+export interface ApiVariant {
+  id: string;
+  name: string;
+  price: string;
+  stock_quantity: number;
+}
+
 export interface ApiProduct {
   id: string;
   name: string;
@@ -11,6 +18,7 @@ export interface ApiProduct {
   vendor: string | null;
   image_url: string | null;
   is_active: boolean;
+  variants: ApiVariant[];
 }
 
 export interface ProductListResponse {

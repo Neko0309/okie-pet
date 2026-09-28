@@ -1,5 +1,6 @@
 import { BrowserRouter, Routes, Route } from "react-router-dom";
 import { AuthProvider } from "./lib/auth";
+import { CartProvider } from "./lib/cart";
 import TopNav from "./components/TopNav";
 import Footer from "./components/Footer";
 import Home from "./pages/Home";
@@ -10,18 +11,20 @@ import Account from "./pages/Account";
 function App() {
   return (
     <AuthProvider>
-      <BrowserRouter>
-        <TopNav />
-        <main style={{ flex: 1, display: "flex", flexDirection: "column" }}>
-          <Routes>
-            <Route path="/" element={<Home />} />
-            <Route path="/products" element={<Products />} />
-            <Route path="/cart" element={<Cart />} />
-            <Route path="/account" element={<Account />} />
-          </Routes>
-        </main>
-        <Footer />
-      </BrowserRouter>
+      <CartProvider>
+        <BrowserRouter>
+          <TopNav />
+          <main style={{ flex: 1, display: "flex", flexDirection: "column" }}>
+            <Routes>
+              <Route path="/" element={<Home />} />
+              <Route path="/products" element={<Products />} />
+              <Route path="/cart" element={<Cart />} />
+              <Route path="/account" element={<Account />} />
+            </Routes>
+          </main>
+          <Footer />
+        </BrowserRouter>
+      </CartProvider>
     </AuthProvider>
   );
 }

@@ -3,10 +3,12 @@ import { useTranslation } from "react-i18next";
 import SearchBar from "./SearchBar";
 import LanguageSwitcher from "./LanguageSwitcher";
 import { CATEGORIES } from "../data/categories";
+import { useCart } from "../lib/cart";
 import "./TopNav.css";
 
 export default function TopNav() {
   const { t } = useTranslation();
+  const { count } = useCart();
 
   return (
     <>
@@ -40,7 +42,7 @@ export default function TopNav() {
             >
               <CartIcon />
               <span className="top-nav__icon-label">{t("nav.cart")}</span>
-              <span className="top-nav__badge">0</span>
+              {count > 0 && <span className="top-nav__badge">{count}</span>}
             </NavLink>
           </div>
         </div>

@@ -13,12 +13,14 @@ constantly-changing inventory data, not something to version control).
 Expected columns (as exported by Pisell): product_id, variant_id, title,
 image, vendor, category, status, stock_quantity, price, original_price.
 Each product has one "parent" row (variant_id is 0/blank) carrying the
-title/image/vendor/category and an aggregate stock_quantity; a
-multi-variant product also has one row per variant below it. We import one
-row per *product* (matching the rest of the app, which doesn't model
-variants yet), using the parent row's price when it's set, falling back to
-the cheapest variant price when the parent's own price is 0 — about 70% of
-this catalog only has real pricing on the variants.
+title/image/vendor/category; a multi-variant product (87% of this catalog)
+also has one row per variant below it, e.g. a size or flavor, each with its
+own price/stock. Every variant row is imported into product_variants, so
+customers pick a specific option before adding to cart. The parent Product
+row keeps an aggregate price (its own, or the cheapest variant's when the
+parent's own price is 0 — about 70% of variant products only price the
+variants) and aggregate stock (summed across variants), used for card/list
+display before a variant is chosen.
 
 Products from a previous import that are no longer present in this file
 are marked inactive rather than deleted, so order history stays intact.
@@ -35,6 +37,7 @@ sys.path.append(str(Path(__file__).resolve().parent.parent))
 from app.core.database import SessionLocal  # noqa: E402
 from app.services.catalog_sync import (  # noqa: E402
     ProductInput,
+    VariantInput,
     deactivate_missing,
     to_decimal,
     upsert_product,
@@ -54,6 +57,18 @@ def first_image(raw: str | None) -> str | None:
     if not raw:
         return None
     return raw.split(";")[0].strip() or None
+
+
+def variant_name(row: dict) -> str:
+    """Combines the option-dimension columns into one label, e.g. a size
+    and a flavor become "单个 · 柿柿如意". Falls back to the variant id if
+    somehow neither dimension is set."""
+    parts = []
+    for item_col in ("variant_item1", "variant_item2", "variant_item3"):
+        value = row.get(item_col)
+        if value:
+            parts.append(str(value))
+    return " · ".join(parts) if parts else f"#{row.get('variant_id')}"
 
 
 def build_products(rows: list[dict]) -> list[ProductInput]:
@@ -93,6 +108,17 @@ def build_products(rows: list[dict]) -> list[ProductInput]:
             stock = parent.get("stock_quantity") or 0
         category = parent.get("category")
 
+        variants = [
+            VariantInput(
+                external_id=str(r.get("variant_id")),
+                name=variant_name(r),
+                price=to_decimal(r.get("price")) or price,
+                stock_quantity=int(r.get("stock_quantity") or 0),
+                sort=i,
+            )
+            for i, r in enumerate(variant_rows)
+        ]
+
         items.append(
             ProductInput(
                 external_id=str(product_id),
@@ -105,6 +131,7 @@ def build_products(rows: list[dict]) -> list[ProductInput]:
                 vendor=parent.get("vendor"),
                 image_url=first_image(parent.get("image")),
                 is_active=parent.get("status") == "published",
+                variants=variants,
             )
         )
     return items

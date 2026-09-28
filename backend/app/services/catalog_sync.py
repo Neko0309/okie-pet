@@ -10,7 +10,7 @@ from decimal import Decimal, InvalidOperation
 from sqlalchemy import select
 from sqlalchemy.orm import Session
 
-from app.models.product import Product
+from app.models.product import Product, ProductVariant
 
 # Pisell's free-text Chinese category names -> our storefront's CategoryId.
 # "deals" isn't a real Pisell category; discounted items are detected from
@@ -65,6 +65,16 @@ def to_decimal(value) -> Decimal | None:
 
 
 @dataclass
+class VariantInput:
+    external_id: str
+    name: str
+    price: Decimal
+    stock_quantity: int
+    sort: int = 0
+    is_active: bool = True
+
+
+@dataclass
 class ProductInput:
     external_id: str
     name: str
@@ -76,6 +86,40 @@ class ProductInput:
     original_price: Decimal | None = None
     is_active: bool = True
     external_source: str = "pisell"
+    variants: list[VariantInput] = field(default_factory=list)
+
+
+def _sync_variants(product: Product, variants: list[VariantInput], external_source: str) -> None:
+    existing_by_external_id = {v.external_id: v for v in product.variants if v.external_id}
+    seen_external_ids: set[str] = set()
+
+    for v in variants:
+        seen_external_ids.add(v.external_id)
+        existing = existing_by_external_id.get(v.external_id)
+        if existing:
+            existing.name = v.name
+            existing.price = v.price
+            existing.stock_quantity = v.stock_quantity
+            existing.sort = v.sort
+            existing.is_active = v.is_active
+        else:
+            product.variants.append(
+                ProductVariant(
+                    external_source=external_source,
+                    external_id=v.external_id,
+                    name=v.name,
+                    price=v.price,
+                    stock_quantity=v.stock_quantity,
+                    sort=v.sort,
+                    is_active=v.is_active,
+                )
+            )
+
+    # Remove variants that disappeared from this product's latest data
+    # (cascade="all, delete-orphan" on the relationship deletes the row).
+    for external_id, existing in existing_by_external_id.items():
+        if external_id not in seen_external_ids:
+            product.variants.remove(existing)
 
 
 def upsert_product(db: Session, item: ProductInput) -> bool:
@@ -106,15 +150,16 @@ def upsert_product(db: Session, item: ProductInput) -> bool:
     if existing:
         for key, value in fields.items():
             setattr(existing, key, value)
+        _sync_variants(existing, item.variants, item.external_source)
         return False
 
-    db.add(
-        Product(
-            external_source=item.external_source,
-            external_id=item.external_id,
-            **fields,
-        )
+    product = Product(
+        external_source=item.external_source,
+        external_id=item.external_id,
+        **fields,
     )
+    _sync_variants(product, item.variants, item.external_source)
+    db.add(product)
     return True
 
 

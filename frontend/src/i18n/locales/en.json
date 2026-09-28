@@ -42,7 +42,12 @@
   "cart": {
     "empty_title": "Your cart is empty",
     "empty_sub": "See what's new in the shop",
-    "cta": "Browse products"
+    "cta": "Browse products",
+    "title": "Cart",
+    "remove": "Remove",
+    "subtotal": "Subtotal",
+    "checkout": "Checkout",
+    "checkout_note": "Checkout is still in development — you can't place a real order yet"
   },
   "account": {
     "login": "Log in",

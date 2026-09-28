@@ -25,6 +25,7 @@ sys.path.append(os.path.dirname(os.path.dirname(os.path.abspath(__file__))))
 from app.core.database import SessionLocal  # noqa: E402
 from app.services.catalog_sync import (  # noqa: E402
     ProductInput,
+    VariantInput,
     deactivate_missing,
     to_decimal,
     upsert_product,
@@ -60,6 +61,17 @@ def fetch_all_products(token: str, merchant_domain: str) -> list[dict]:
     return products
 
 
+def variant_label(raw_variant: dict) -> str:
+    """The API returns each variant's name as {"1": "43g"} (keyed by option
+    dimension) rather than a plain string — join whatever's there."""
+    name_map = raw_variant.get("name") or raw_variant.get("title") or {}
+    if isinstance(name_map, dict):
+        parts = [str(v) for v in name_map.values() if v]
+        if parts:
+            return " · ".join(parts)
+    return f"#{raw_variant.get('id')}"
+
+
 def to_product_input(raw: dict) -> ProductInput:
     price = to_decimal(raw.get("base_price") or raw.get("price"))
     if price is None:
@@ -73,11 +85,22 @@ def to_product_input(raw: dict) -> ProductInput:
     # Same unreliable-parent-aggregate issue as price: sum the variants'
     # own stock when there are any, rather than trusting sum_stock/
     # stock_quantity on the parent record.
-    variants = raw.get("variant") or []
-    if variants:
-        stock = sum((v.get("stock_quantity") or 0) for v in variants)
+    raw_variants = raw.get("variant") or []
+    if raw_variants:
+        stock = sum((v.get("stock_quantity") or 0) for v in raw_variants)
     else:
         stock = raw.get("sum_stock", raw.get("stock_quantity", 0)) or 0
+
+    variants = [
+        VariantInput(
+            external_id=str(v["id"]),
+            name=variant_label(v),
+            price=to_decimal(v.get("price")) or price,
+            stock_quantity=v.get("stock_quantity") or 0,
+            sort=i,
+        )
+        for i, v in enumerate(raw_variants)
+    ]
 
     return ProductInput(
         external_id=str(raw["id"]),
@@ -90,6 +113,7 @@ def to_product_input(raw: dict) -> ProductInput:
         vendor=vendor_list[0]["name"] if vendor_list else None,
         image_url=raw.get("cover") or None,
         is_active=raw.get("status") == "published",
+        variants=variants,
     )
 
 

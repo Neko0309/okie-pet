@@ -42,7 +42,12 @@
   "cart": {
     "empty_title": "购物车还是空的",
     "empty_sub": "看看有什么新鲜好物吧",
-    "cta": "去逛逛"
+    "cta": "去逛逛",
+    "title": "购物车",
+    "remove": "移除",
+    "subtotal": "小计",
+    "checkout": "去结算",
+    "checkout_note": "结算功能还在开发中,暂时还不能真的下单"
   },
   "account": {
     "login": "登录",
