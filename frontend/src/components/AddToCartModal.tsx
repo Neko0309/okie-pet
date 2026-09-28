@@ -81,13 +81,13 @@ export default function AddToCartModal({
         </div>
 
         {cleanDescription && (
-          <details className="add-modal__details">
-            <summary>{t("add_modal.details")}</summary>
+          <div className="add-modal__details">
+            <p className="add-modal__label">{t("add_modal.details")}</p>
             <div
               className="add-modal__details-body"
               dangerouslySetInnerHTML={{ __html: cleanDescription }}
             />
-          </details>
+          </div>
         )}
 
         {hasVariants && (

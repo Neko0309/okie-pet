@@ -177,45 +177,19 @@
 }
 
 .add-modal__details {
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
   border: 1.5px solid var(--color-card-line);
   border-radius: 12px;
   background: var(--color-surface);
-  overflow: hidden;
-}
-
-.add-modal__details summary {
-  padding: 10px 14px;
-  font-size: 12.5px;
-  font-weight: 600;
-  color: var(--color-ink);
-  cursor: pointer;
-  list-style: none;
-  display: flex;
-  align-items: center;
-  justify-content: space-between;
-}
-
-.add-modal__details summary::-webkit-details-marker {
-  display: none;
-}
-
-.add-modal__details summary::after {
-  content: "▾";
-  color: var(--color-ink-muted);
-  transition: transform 0.2s;
-}
-
-.add-modal__details[open] summary::after {
-  transform: rotate(180deg);
+  padding: 12px 14px;
 }
 
 .add-modal__details-body {
-  padding: 0 14px 14px;
   font-size: 12.5px;
   line-height: 1.6;
   color: var(--color-ink-muted);
-  max-height: 260px;
-  overflow-y: auto;
 }
 
 .add-modal__details-body p {
