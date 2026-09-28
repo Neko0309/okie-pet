@@ -1,4 +1,5 @@
 import { useMemo, useState } from "react";
+import { useSearchParams } from "react-router-dom";
 import ProductCard from "../components/ProductCard";
 import { CATEGORIES, type CategoryId } from "../data/categories";
 import { MOCK_PRODUCTS } from "../data/mockProducts";
@@ -15,12 +16,18 @@ const SORT_LABELS: Record<SortMode, string> = {
 const SORT_CYCLE: SortMode[] = ["recommended", "price-asc", "price-desc"];
 
 export default function Products() {
-  const [activeCategory, setActiveCategory] = useState<CategoryId | "all">("all");
+  const [searchParams] = useSearchParams();
+  const initialCategory = searchParams.get("cat") as CategoryId | null;
+  const [activeCategory, setActiveCategory] = useState<CategoryId | "all">(
+    initialCategory ?? "all",
+  );
   const [sortMode, setSortMode] = useState<SortMode>("recommended");
 
   const products = useMemo(() => {
     let list = MOCK_PRODUCTS;
-    if (activeCategory !== "all") {
+    if (activeCategory === "deals") {
+      list = list.filter((p) => p.discount);
+    } else if (activeCategory !== "all") {
       list = list.filter((p) => p.category === activeCategory);
     }
     if (sortMode === "price-asc") {
@@ -47,7 +54,7 @@ export default function Products() {
           >
             全部
           </button>
-          {CATEGORIES.filter((c) => c.id !== "deals").map((c) => (
+          {CATEGORIES.map((c) => (
             <button
               key={c.id}
               type="button"

@@ -1,26 +1,30 @@
 :root {
-  --color-bg: #f8e7b8;
-  --color-bg-deep: #f2d98f;
+  --color-bg: #f5e4a8;
+  --color-bg-deep: #eacf78;
+  --color-paper: #fbf5e6;
   --color-surface: #ffffff;
-  --color-surface-2: #fffaea;
-  --color-ink: #3e2f1c;
-  --color-ink-muted: #8a7657;
-  --color-price: #bd7f2e;
-  --color-accent: #d9a441;
-  --color-accent-soft: #f1dda0;
-  --color-pink: #efabb9;
-  --color-line: #ead9a0;
-  --color-card-line: #f0ead4;
+  --color-surface-2: #fbf5e6;
+  --color-ink: #6e4b3e;
+  --color-ink-muted: #9a7d70;
+  --color-price: #d9a93a;
+  --color-accent: #b8657f;
+  --color-accent-soft: #f4d7dc;
+  --color-mint: #a9cbc9;
+  --color-line: #eadfc6;
+  --color-card-line: #eadfc6;
   --color-danger: #c8553d;
+  --shadow-sticker: 0 2px 0 var(--color-line);
 
+  --font-display: "ZCOOL KuaiLe", "Fredoka", "PingFang SC", "Microsoft YaHei", sans-serif;
+  --font-latin: "Fredoka", "PingFang SC", "Microsoft YaHei", sans-serif;
   --font-sans:
-    -apple-system, BlinkMacSystemFont, "PingFang SC", "Helvetica Neue",
-    "Segoe UI", Roboto, sans-serif;
+    "PingFang SC", "Hiragino Sans GB", "Microsoft YaHei", "Noto Sans SC",
+    -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif;
 
   color-scheme: light;
-  font: 15px/1.5 var(--font-sans);
+  font: 15px/1.6 var(--font-sans);
   color: var(--color-ink);
-  background: var(--color-bg);
+  background: var(--color-paper);
   -webkit-font-smoothing: antialiased;
 }
 
@@ -30,12 +34,12 @@
 
 body {
   margin: 0;
-  background: var(--color-bg);
+  background: var(--color-paper);
 }
 
 #root {
   min-height: 100svh;
-  background: var(--color-bg);
+  background: var(--color-paper);
   display: flex;
   flex-direction: column;
 }
@@ -69,4 +73,29 @@ input {
 a {
   color: inherit;
   text-decoration: none;
+}
+
+/* Section titles: hand-drawn plaque, matching the design reference */
+.plaque {
+  display: flex;
+  align-items: center;
+  gap: 18px;
+  margin: 8px 0 4px;
+}
+
+.plaque h2 {
+  font-family: var(--font-display);
+  font-weight: 400;
+  font-size: 30px;
+  color: var(--color-ink);
+  background: var(--color-accent-soft);
+  padding: 4px 22px 2px;
+  border-radius: 18px 22px 16px 24px;
+  box-shadow: 4px 4px 0 var(--color-bg-deep);
+}
+
+.plaque .doodle {
+  flex: 1;
+  height: 10px;
+  background: radial-gradient(circle, var(--color-mint) 2.5px, transparent 3px) 0 50% / 18px 10px repeat-x;
 }

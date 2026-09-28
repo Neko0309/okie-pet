@@ -1,0 +1,33 @@
+.site-footer {
+  margin-top: auto;
+  background: var(--color-bg);
+  padding: 40px 0;
+}
+
+.site-footer__inner {
+  display: grid;
+  grid-template-columns: 1.3fr 1fr 1fr;
+  gap: 32px;
+}
+
+.site-footer h4 {
+  font-family: var(--font-display);
+  font-weight: 400;
+  font-size: 20px;
+  margin: 0 0 8px;
+  color: var(--color-accent);
+}
+
+.site-footer p {
+  margin: 0;
+  color: var(--color-ink-muted);
+  font-size: 14px;
+  line-height: 1.6;
+}
+
+@media (max-width: 720px) {
+  .site-footer__inner {
+    grid-template-columns: 1fr;
+    gap: 24px;
+  }
+}

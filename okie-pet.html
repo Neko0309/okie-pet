@@ -1,0 +1,434 @@
+<!DOCTYPE html>
+<html lang="zh">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<title>Okie Pet 宠物用品</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=ZCOOL+KuaiLe&family=Fredoka:wght@500;600&display=swap" rel="stylesheet">
+<style>
+:root{
+  --butter:#F5E4A8; --butter-deep:#EACF78; --paper:#FBF5E6; --card:#FFFFFF;
+  --rose:#B8657F; --blush:#F4D7DC; --cocoa:#6E4B3E; --cocoa-soft:#9A7D70;
+  --mint:#A9CBC9; --line:#EADFC6; --price:#D9A93A; --shadow:0 2px 0 #EADFC6;
+  --display:"ZCOOL KuaiLe","Fredoka","PingFang SC","Microsoft YaHei",sans-serif;
+  --latin:"Fredoka","PingFang SC","Microsoft YaHei",sans-serif;
+  --body:"PingFang SC","Hiragino Sans GB","Microsoft YaHei","Noto Sans SC",system-ui,sans-serif;
+  box-sizing:border-box;
+  padding-top:env(safe-area-inset-top,0px);
+  padding-bottom:env(safe-area-inset-bottom,0px);
+}
+@media (prefers-color-scheme: dark){
+  :root:not([data-theme="light"]){
+    --butter:#4A3E22; --butter-deep:#6B5A2E; --paper:#241D18; --card:#2F2620;
+    --rose:#E59AB0; --blush:#4A3036; --cocoa:#F3E6D8; --cocoa-soft:#C4AE9F;
+    --mint:#5E7F7D; --line:#3E332A; --price:#F0C45C; --shadow:0 2px 0 #1A1511;
+  }
+}
+:root[data-theme="dark"]{
+  --butter:#4A3E22; --butter-deep:#6B5A2E; --paper:#241D18; --card:#2F2620;
+  --rose:#E59AB0; --blush:#4A3036; --cocoa:#F3E6D8; --cocoa-soft:#C4AE9F;
+  --mint:#5E7F7D; --line:#3E332A; --price:#F0C45C; --shadow:0 2px 0 #1A1511;
+}
+html{scroll-padding-top:calc(env(safe-area-inset-top,0px) + 130px)}
+*,*::before,*::after{box-sizing:inherit}
+body{margin:0;background:var(--paper);color:var(--cocoa);font-family:var(--body);font-size:16px;line-height:1.6}
+img,svg{max-width:100%}
+button{font:inherit;color:inherit;cursor:pointer}
+:focus-visible{outline:3px solid var(--rose);outline-offset:3px;border-radius:8px}
+.wrap{max-width:1200px;margin:0 auto;padding:0 32px}
+
+/* Header */
+.top{position:sticky;top:env(safe-area-inset-top,0px);z-index:20;background:var(--butter);border-bottom:2px dashed var(--butter-deep)}
+.top .wrap{display:flex;align-items:center;gap:28px;height:76px}
+.logo{font-family:var(--latin);font-weight:600;font-size:30px;color:var(--rose);text-decoration:none;letter-spacing:.5px;white-space:nowrap;display:flex;align-items:center;gap:8px}
+.logo svg{width:34px;height:34px}
+.search{flex:1;display:flex;align-items:center;gap:10px;background:var(--card);border-radius:999px;padding:0 20px;height:46px;border:2px solid transparent}
+.search:focus-within{border-color:var(--rose)}
+.search input{flex:1;border:0;background:transparent;font:inherit;color:var(--cocoa);outline:none;min-width:0}
+.search input::placeholder{color:var(--cocoa-soft)}
+.icon-btn{display:flex;align-items:center;gap:8px;background:none;border:0;padding:8px 10px;border-radius:12px;font-size:15px;white-space:nowrap}
+.icon-btn:hover{background:rgba(255,255,255,.45)}
+.badge{min-width:22px;height:22px;border-radius:11px;background:var(--rose);color:#fff;font-size:12px;display:inline-grid;place-items:center;padding:0 6px;font-family:var(--latin)}
+.nav{background:var(--card);border-bottom:1px solid var(--line)}
+.nav .wrap{display:flex;gap:6px;overflow-x:auto;height:52px;align-items:center}
+.nav button{background:none;border:0;padding:8px 16px;font-size:16px;color:var(--cocoa-soft);border-radius:10px;white-space:nowrap;position:relative}
+.nav button[aria-pressed="true"]{color:var(--cocoa);font-weight:600}
+.nav button[aria-pressed="true"]::after{content:"";position:absolute;left:16px;right:16px;bottom:0;height:4px;border-radius:2px;background:var(--butter-deep)}
+.nav button:hover{color:var(--cocoa)}
+
+/* Ribbon */
+.ribbon{margin:24px auto 0;display:flex;justify-content:center;gap:40px;background:var(--butter);border-radius:999px;padding:12px 28px;font-size:16px;width:fit-content;max-width:100%;flex-wrap:wrap}
+.ribbon span{display:flex;align-items:center;gap:8px}
+
+/* Hero */
+.hero{display:grid;grid-template-columns:1fr 1.1fr;gap:40px;align-items:center;padding:36px 0 20px}
+.hero h1{font-family:var(--display);font-weight:400;font-size:clamp(40px,5vw,64px);line-height:1.15;margin:0 0 16px;color:var(--rose)}
+.hero p{font-size:18px;color:var(--cocoa-soft);margin:0 0 28px;max-width:30em}
+.cta{display:inline-flex;align-items:center;gap:10px;background:var(--rose);color:#fff;border:0;border-radius:999px;padding:14px 30px;font-size:17px;box-shadow:0 4px 0 #8F4A61}
+.cta:active{transform:translateY(2px);box-shadow:0 2px 0 #8F4A61}
+.hero-art svg{width:100%;height:auto;display:block}
+
+/* Section titles: hand-drawn plaque like the reference banners */
+.plaque{display:flex;align-items:center;gap:18px;margin:44px 0 22px}
+.plaque h2{font-family:var(--display);font-weight:400;font-size:38px;margin:0;color:var(--cocoa);background:var(--blush);padding:4px 26px 2px;border-radius:18px 22px 16px 24px;box-shadow:4px 4px 0 var(--butter-deep)}
+.plaque .doodle{flex:1;height:10px;background:radial-gradient(circle,var(--mint) 2.5px,transparent 3px) 0 50%/18px 10px repeat-x}
+
+/* Categories */
+.cats{display:grid;grid-template-columns:repeat(6,1fr);gap:18px}
+.cat{background:none;border:0;padding:14px 8px 10px;border-radius:24px;display:flex;flex-direction:column;align-items:center;gap:6px}
+.cat:hover .cat-blob{transform:rotate(-4deg) scale(1.04)}
+.cat-blob{width:120px;height:110px;display:grid;place-items:center;transition:transform .2s}
+.cat-blob svg{width:100%;height:100%}
+.cat span{font-family:var(--display);font-size:24px;color:var(--rose)}
+
+/* Products */
+.toolbar{display:flex;align-items:center;justify-content:space-between;gap:16px;flex-wrap:wrap;margin-bottom:18px}
+.chips{display:flex;gap:8px;flex-wrap:wrap}
+.chip{border:2px solid var(--line);background:var(--card);border-radius:999px;padding:6px 18px;font-size:15px;color:var(--cocoa-soft)}
+.chip[aria-pressed="true"]{border-color:var(--butter-deep);background:var(--butter);color:var(--cocoa);font-weight:600}
+.sort{display:flex;align-items:center;gap:8px;color:var(--cocoa-soft);font-size:15px}
+.sort select{font:inherit;color:var(--cocoa);background:var(--card);border:2px solid var(--line);border-radius:12px;padding:6px 12px}
+.grid{display:grid;grid-template-columns:repeat(4,1fr);gap:22px}
+.card{background:var(--card);border-radius:22px;overflow:hidden;display:flex;flex-direction:column;box-shadow:var(--shadow);border:1px solid var(--line)}
+.thumb{position:relative;aspect-ratio:1}
+.thumb svg{display:block;width:100%;height:100%}
+.tag{position:absolute;top:12px;left:12px;background:var(--butter);color:var(--cocoa);font-size:13px;padding:3px 12px;border-radius:10px}
+.stamp{position:absolute;inset:0;display:grid;place-items:center;background:rgba(251,245,230,.45)}
+.stamp b{font-family:var(--display);font-weight:400;font-size:30px;color:var(--cocoa);border:3px solid var(--cocoa);border-radius:10px;padding:2px 18px;transform:rotate(-14deg);background:rgba(255,255,255,.85)}
+.info{padding:14px 18px 16px;display:flex;flex-direction:column;flex:1}
+.info h3{font-size:17px;font-weight:500;margin:0 0 10px;line-height:1.4}
+.row{margin-top:auto;display:flex;align-items:center;justify-content:space-between}
+.price{font-family:var(--latin);font-weight:600;font-size:22px;color:var(--price)}
+.price s{font-size:14px;color:var(--cocoa-soft);font-weight:500;margin-left:6px}
+.add{width:40px;height:40px;border-radius:50%;border:0;background:var(--butter-deep);color:#fff;display:grid;place-items:center}
+.add:disabled{background:var(--line);cursor:not-allowed}
+.add svg{width:20px;height:20px}
+.empty{grid-column:1/-1;text-align:center;padding:48px 0;color:var(--cocoa-soft)}
+.empty button{margin-top:12px}
+
+/* Footer */
+footer{margin-top:72px;background:var(--butter);padding:40px 0}
+footer .wrap{display:grid;grid-template-columns:1.3fr 1fr 1fr;gap:32px}
+footer h4{font-family:var(--display);font-weight:400;font-size:22px;margin:0 0 8px;color:var(--rose)}
+footer p{margin:0;color:var(--cocoa-soft);font-size:15px}
+
+/* Cart drawer */
+.scrim{position:fixed;inset:0;background:rgba(60,40,30,.35);opacity:0;pointer-events:none;transition:opacity .25s;z-index:40}
+.drawer{position:fixed;top:0;right:0;bottom:0;width:min(420px,100%);background:var(--paper);z-index:41;transform:translateX(100%);transition:transform .3s ease;display:flex;flex-direction:column;padding-top:env(safe-area-inset-top,0px);padding-bottom:env(safe-area-inset-bottom,0px)}
+.open .scrim{opacity:1;pointer-events:auto}
+.open .drawer{transform:none}
+.dhead{display:flex;justify-content:space-between;align-items:center;padding:20px 24px;background:var(--butter)}
+.dhead h2{font-family:var(--display);font-weight:400;font-size:28px;margin:0}
+.ship{padding:16px 24px;border-bottom:1px dashed var(--line);font-size:14px}
+.bar{height:10px;background:var(--line);border-radius:5px;margin-top:8px;overflow:hidden}
+.bar i{display:block;height:100%;background:var(--rose);border-radius:5px;transition:width .3s}
+.items{flex:1;overflow-y:auto;padding:8px 24px}
+.item{display:grid;grid-template-columns:64px 1fr auto;gap:14px;align-items:center;padding:14px 0;border-bottom:1px solid var(--line)}
+.item svg{width:64px;height:64px;border-radius:14px}
+.item h3{font-size:15px;font-weight:500;margin:0;line-height:1.35}
+.item .p{font-family:var(--latin);color:var(--price);font-weight:600}
+.qty{display:flex;align-items:center;gap:6px}
+.qty button{width:28px;height:28px;border-radius:50%;border:2px solid var(--line);background:var(--card)}
+.qty span{min-width:20px;text-align:center;font-family:var(--latin)}
+.dfoot{padding:18px 24px;border-top:2px dashed var(--line)}
+.total{display:flex;justify-content:space-between;font-size:18px;margin-bottom:14px}
+.total b{font-family:var(--latin);color:var(--price);font-size:24px}
+.dfoot .cta{width:100%;justify-content:center}
+.note{font-size:13px;color:var(--cocoa-soft);margin:10px 0 0;text-align:center;min-height:1.6em}
+.cart-empty{text-align:center;color:var(--cocoa-soft);padding:48px 0}
+
+@media (max-width:980px){
+  .grid{grid-template-columns:repeat(3,1fr)}
+  .cats{grid-template-columns:repeat(3,1fr)}
+  .hero{grid-template-columns:1fr}
+  .hero-art{max-width:520px}
+}
+@media (max-width:680px){
+  .wrap{padding:0 16px}
+  .top .wrap{gap:10px;height:64px}
+  .logo{font-size:22px}
+  .logo svg{display:none}
+  .icon-btn .lbl{display:none}
+  .grid{grid-template-columns:repeat(2,1fr);gap:12px}
+  .ribbon{gap:12px;border-radius:20px;font-size:14px}
+  .plaque h2{font-size:30px}
+  footer .wrap{grid-template-columns:1fr}
+}
+@media (prefers-reduced-motion:reduce){*{transition:none!important}}
+</style>
+</head>
+<body>
+
+<header class="top">
+  <div class="wrap">
+    <a class="logo" href="#home">
+      <svg viewBox="0 0 40 40" aria-hidden="true"><g fill="currentColor"><ellipse cx="20" cy="26" rx="9" ry="7.5"/><circle cx="9" cy="16" r="4"/><circle cx="16" cy="9" r="4"/><circle cx="24" cy="9" r="4"/><circle cx="31" cy="16" r="4"/></g></svg>
+      Okie Pet
+    </a>
+    <label class="search">
+      <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" aria-hidden="true"><circle cx="11" cy="11" r="7"/><path d="m20 20-4-4"/></svg>
+      <input id="q" type="search" placeholder="搜索商品或品牌" aria-label="搜索商品">
+    </label>
+    <button class="icon-btn" type="button">
+      <svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" aria-hidden="true"><circle cx="12" cy="8" r="4"/><path d="M4 21c1.5-4 4.5-6 8-6s6.5 2 8 6"/></svg>
+      <span class="lbl">个人中心</span>
+    </button>
+    <button class="icon-btn" type="button" id="openCart">
+      <svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linejoin="round" aria-hidden="true"><path d="M3 4h2.5l2.2 11h10.6L20.5 7H7"/><circle cx="9" cy="19.5" r="1.5"/><circle cx="17" cy="19.5" r="1.5"/></svg>
+      <span class="lbl">购物车</span><span class="badge" id="count">0</span>
+    </button>
+  </div>
+</header>
+<nav class="nav" aria-label="商品分类">
+  <div class="wrap" id="navTabs"></div>
+</nav>
+
+<main class="wrap" id="home">
+  <div class="ribbon">
+    <span>🚚 全澳满 $169 包邮</span>
+    <span>⚡ 墨尔本当日配送</span>
+  </div>
+
+  <section class="hero">
+    <div>
+      <h1>给毛孩子的<br>每日小确幸</h1>
+      <p>冻干、主粮、罐头和日常用品，我们一件件挑过。墨尔本下午前下单，当天就能送到家门口。</p>
+      <button class="cta" type="button" data-jump="all">逛逛全部商品</button>
+    </div>
+    <div class="hero-art" aria-hidden="true">
+      <svg viewBox="0 0 480 380">
+        <g fill="none" stroke="#6E4B3E" stroke-width="3" stroke-linecap="round" stroke-linejoin="round">
+          <ellipse cx="240" cy="350" rx="200" ry="14" fill="#EADFC6" stroke="none"/>
+          <!-- building -->
+          <path d="M72 128 L408 128 L404 344 L76 346 Z" fill="#FFF8E8"/>
+          <!-- sign -->
+          <rect x="150" y="18" width="180" height="52" rx="16" fill="#F4D7DC"/>
+          <text x="240" y="55" text-anchor="middle" font-family="Fredoka, sans-serif" font-size="30" font-weight="600" fill="#B8657F" stroke="none">OKIE PET</text>
+          <path d="M190 70 L186 92 M290 70 L294 92"/>
+          <!-- awning stripes -->
+          <path d="M56 92 L424 92 L424 136 L56 136 Z" fill="#F5E4A8"/>
+          <path d="M102 92v44 M148 92v44 M194 92v44 M240 92v44 M286 92v44 M332 92v44 M378 92v44" stroke="#F4D7DC" stroke-width="22"/>
+          <path d="M56 92 L424 92 L424 136 L56 136 Z"/>
+          <path d="M56 136 q23 26 46 0 q23 26 46 0 q23 26 46 0 q23 26 46 0 q23 26 46 0 q23 26 46 0 q23 26 46 0 q23 26 46 0" fill="#F5E4A8"/>
+          <!-- window -->
+          <rect x="102" y="186" width="180" height="128" rx="12" fill="#E3EFEE"/>
+          <!-- cat -->
+          <path d="M132 262 l6 -34 l18 20 M196 262 l-6 -34 l-18 20" fill="#F6D9A8"/>
+          <ellipse cx="164" cy="274" rx="38" ry="32" fill="#F6D9A8"/>
+          <path d="M150 262 q-6 -4 -12 0 M180 262 q6 -4 12 0" stroke-width="2.5"/>
+          <circle cx="152" cy="274" r="3.2" fill="#6E4B3E"/><circle cx="176" cy="274" r="3.2" fill="#6E4B3E"/>
+          <path d="M160 284 q4 4 8 0" stroke-width="2.5"/>
+          <ellipse cx="142" cy="286" rx="6" ry="3.5" fill="#F4B5C0" stroke="none"/><ellipse cx="186" cy="286" rx="6" ry="3.5" fill="#F4B5C0" stroke="none"/>
+          <!-- dog -->
+          <ellipse cx="240" cy="276" rx="34" ry="30" fill="#EFB77A"/>
+          <path d="M210 262 q-18 6 -12 34 q12 2 16 -14 M270 262 q18 6 12 34 q-12 2 -16 -14" fill="#C98A4E"/>
+          <ellipse cx="240" cy="290" rx="16" ry="12" fill="#FFF8E8"/>
+          <circle cx="228" cy="272" r="3.2" fill="#6E4B3E"/><circle cx="252" cy="272" r="3.2" fill="#6E4B3E"/>
+          <ellipse cx="240" cy="284" rx="5" ry="3.5" fill="#6E4B3E"/>
+          <path d="M240 288 v5 q-5 5 -9 0 M240 293 q5 5 9 0" stroke-width="2.5"/>
+          <!-- window sill paws -->
+          <path d="M102 314 h180" stroke-width="5"/>
+          <!-- door -->
+          <path d="M310 344 V214 q0 -24 30 -24 q30 0 30 24 V344" fill="#F4D7DC"/>
+          <circle cx="358" cy="276" r="4" fill="#6E4B3E"/>
+          <path d="M324 228 h32 v36 h-32 z" fill="#E3EFEE"/>
+          <!-- little bag on step -->
+          <path d="M396 344 l4 -40 h34 l4 40 z" fill="#A9CBC9"/>
+          <path d="M408 304 q9 -16 18 0"/>
+          <path d="M412 324 q5 -6 10 0 q5 -6 10 0 l-10 10 z" fill="#F4B5C0" stroke-width="2"/>
+        </g>
+        <g fill="#EACF78">
+          <path d="M40 60 l5 14 14 5 -14 5 -5 14 -5 -14 -14 -5 14 -5z"/>
+          <path d="M438 44 l3 9 9 3 -9 3 -3 9 -3 -9 -9 -3 9 -3z"/>
+          <path d="M446 190 l4 11 11 4 -11 4 -4 11 -4 -11 -11 -4 11 -4z"/>
+        </g>
+      </svg>
+    </div>
+  </section>
+
+  <div class="plaque"><h2>店铺分类</h2><div class="doodle"></div></div>
+  <div class="cats" id="cats"></div>
+
+  <div class="plaque" id="products"><h2>热门产品</h2><div class="doodle"></div></div>
+  <div class="toolbar">
+    <div class="chips" id="chips"></div>
+    <label class="sort">排序
+      <select id="sort">
+        <option value="rec">推荐</option>
+        <option value="asc">价格从低到高</option>
+        <option value="desc">价格从高到低</option>
+      </select>
+    </label>
+  </div>
+  <div class="grid" id="grid"></div>
+</main>
+
+<footer>
+  <div class="wrap">
+    <div><h4>Okie Pet</h4><p>墨尔本本地宠物用品小店，专注猫狗的吃喝玩乐。</p></div>
+    <div><h4>配送</h4><p>全澳满 $169 包邮<br>墨尔本当日配送</p></div>
+    <div><h4>联系我们</h4><p>微信客服：okiepet<br>营业时间：每天 10:00–19:00</p></div>
+  </div>
+</footer>
+
+<div id="cartRoot">
+  <div class="scrim" id="scrim"></div>
+  <aside class="drawer" role="dialog" aria-modal="true" aria-labelledby="cartTitle">
+    <div class="dhead"><h2 id="cartTitle">购物车</h2><button class="icon-btn" id="closeCart" type="button" aria-label="关闭购物车">✕</button></div>
+    <div class="ship" id="ship"></div>
+    <div class="items" id="items"></div>
+    <div class="dfoot">
+      <div class="total"><span>合计</span><b id="total">$0.00</b></div>
+      <button class="cta" id="checkout" type="button">去结算</button>
+      <p class="note" id="note" aria-live="polite"></p>
+    </div>
+  </aside>
+</div>
+
+<script>
+const FREE = 169;
+const CATS = [
+  {id:'dry', name:'冻干'}, {id:'goods', name:'用品'}, {id:'can', name:'罐头'},
+  {id:'food', name:'主粮'}, {id:'snack', name:'零食'}, {id:'sale', name:'折扣'}
+];
+const PRODUCTS = [
+  {id:1, name:'尾巴生活 白月光流心罐', price:3.99, cat:'can', shape:'can', color:'#BFD5EA', label:'白月光'},
+  {id:2, name:'尾巴生活 莓莓流心罐', price:3.69, cat:'can', shape:'can', color:'#F2C1CC', label:'莓莓'},
+  {id:3, name:'诚实一口 小金袋猫粮', price:51.99, cat:'food', shape:'bag', color:'#E9D29A', label:'小金袋', soldOut:true},
+  {id:4, name:'petshy 白茶豆腐混合猫砂', price:15.99, old:18.99, cat:'goods', shape:'bag', color:'#D6E6CC', label:'白茶', sale:true},
+  {id:5, name:'朗诺 小靓兔', price:17.90, cat:'dry', shape:'bag', color:'#F0B5A8', label:'小靓兔'},
+  {id:6, name:'petshy 山茶花豆腐混木薯', price:15.99, old:18.99, cat:'goods', shape:'bag', color:'#F5D3DA', label:'山茶花', sale:true},
+  {id:7, name:'爱立方 小鲜砖', price:19.49, cat:'dry', shape:'box', color:'#BCD9EE', label:'小鲜砖'},
+  {id:8, name:'urpet 全价猫用主食冻干', price:24.90, cat:'dry', shape:'box', color:'#CBB8DD', label:'主食冻干'},
+  {id:9, name:'猫饭双拼餐盒 37.5g×2', price:4.50, cat:'can', shape:'can', color:'#F7C6A3', label:'双拼'},
+  {id:10, name:'鸡胸肉条 100g', price:6.99, cat:'snack', shape:'bag', color:'#F4DDB0', label:'鸡肉条'},
+  {id:11, name:'金枪鱼猫条 20支', price:9.99, old:12.99, cat:'snack', shape:'bag', color:'#F9D7A0', label:'猫条', sale:true},
+  {id:12, name:'羽毛逗猫棒', price:8.99, cat:'goods', shape:'box', color:'#CFE3E0', label:'逗猫棒'}
+];
+
+// Hand-drawn style package illustrations (swap for real photos later)
+function art(p){
+  const s = 'stroke="#6E4B3E" stroke-width="3" stroke-linejoin="round" stroke-linecap="round"';
+  let body;
+  if(p.shape==='can'){
+    body = `<ellipse cx="100" cy="150" rx="52" ry="14" fill="${p.color}" ${s}/>
+      <rect x="48" y="82" width="104" height="68" fill="${p.color}" stroke="none"/>
+      <path d="M48 82v68 M152 82v68" ${s} fill="none"/>
+      <ellipse cx="100" cy="82" rx="52" ry="14" fill="#FFF8E8" ${s}/>
+      <ellipse cx="100" cy="82" rx="36" ry="8" fill="none" ${s} stroke-width="2"/>
+      <rect x="62" y="104" width="76" height="28" rx="8" fill="#FFF8E8" ${s} stroke-width="2"/>`;
+  } else if(p.shape==='box'){
+    body = `<path d="M50 70 L138 60 L152 72 L152 158 L64 166 L50 154 Z" fill="${p.color}" ${s}/>
+      <path d="M50 70 L64 82 L152 72 M64 82 V166" fill="none" ${s}/>
+      <rect x="76" y="100" width="62" height="32" rx="8" fill="#FFF8E8" ${s} stroke-width="2" transform="rotate(-4 107 116)"/>`;
+  } else {
+    body = `<path d="M60 58 h80 l8 14 -4 94 q-44 10 -88 0 l-4 -94 z" fill="${p.color}" ${s}/>
+      <path d="M58 72 h86" fill="none" ${s}/>
+      <path d="M68 58 l4 -8 h56 l4 8" fill="${p.color}" ${s}/>
+      <rect x="70" y="100" width="60" height="32" rx="8" fill="#FFF8E8" ${s} stroke-width="2"/>`;
+  }
+  const ty = p.shape==='can'?123:p.shape==='box'?121:121;
+  return `<svg viewBox="0 0 200 200" role="img" aria-label="${p.name}">
+    <rect width="200" height="200" fill="${p.color}" opacity=".28"/>
+    <circle cx="160" cy="40" r="5" fill="#EACF78"/><circle cx="36" cy="160" r="4" fill="#A9CBC9"/>
+    <ellipse cx="100" cy="176" rx="62" ry="8" fill="#6E4B3E" opacity=".12"/>
+    ${body}
+    <text x="100" y="${ty}" text-anchor="middle" font-family="ZCOOL KuaiLe, sans-serif" font-size="${p.label.length>3?14:17}" fill="#B8657F">${p.label}</text>
+  </svg>`;
+}
+
+const CAT_ICONS = {
+  dry:`<path d="M34 34h40l6 10-4 48q-22 6-44 0l-4-48z" fill="#D6E6EF"/><path d="M60 26h30l4 10-2 40q-10 4-20 2" fill="#F5E4A8"/><rect x="44" y="58" width="20" height="14" rx="3" fill="#F7C47E"/><rect x="26" y="86" width="12" height="8" rx="3" fill="#F7C47E"/>`,
+  goods:`<path d="M44 44h40v50H44z" fill="#D6E6EF"/><path d="M54 44q10-22 20 0" fill="none"/><path d="M60 64q4-6 8 0q4-6 8 0l-8 10z" fill="#F4B5C0"/><rect x="26" y="58" width="12" height="36" rx="4" fill="#F5E4A8"/><path d="M30 58v-8h6v8"/>`,
+  can:`<ellipse cx="46" cy="90" rx="22" ry="6" fill="#D6E6EF"/><path d="M24 64v26h44V64" fill="#D6E6EF"/><ellipse cx="46" cy="64" rx="22" ry="6" fill="#FFF8E8"/><path d="M36 76q8-6 16 0q-8 6-16 0z M52 76l6-4v8z" fill="#F7C47E"/><rect x="66" y="30" width="30" height="62" rx="8" fill="#DCCBE6"/><path d="M76 50l10 8 M84 48l-6 12"/>`,
+  food:`<path d="M26 40h34l4 54H22z" fill="#F5E4A8"/><path d="M56 34h34l4 60H60z" fill="#F7D6A6"/><text x="42" y="70" font-size="11" text-anchor="middle" fill="#6E4B3E" stroke="none" font-family="Fredoka">CAT</text><text x="76" y="68" font-size="11" text-anchor="middle" fill="#6E4B3E" stroke="none" font-family="Fredoka">DOG</text><path d="M48 96q12-10 24 0z" fill="#D6E6EF"/>`,
+  snack:`<path d="M34 36h52l4 12-2 44q-28 8-56 0l-2-44z" fill="#FFF8E8"/><rect x="48" y="28" width="24" height="10" rx="3" fill="#F4B5C0"/><path d="M44 60h8 M60 70l8 6 M50 80l6-4" stroke="#F4B5C0" stroke-width="6"/><circle cx="72" cy="58" r="5" fill="#A9CBC9" stroke="none"/><circle cx="44" cy="74" r="4" fill="#F5E4A8" stroke="none"/>`,
+  sale:`<path d="M58 30h34l4 64H54z" fill="#F5E4A8"/><text x="75" y="66" font-size="14" text-anchor="middle" fill="#6E4B3E" stroke="none" font-family="Fredoka">GO!</text><path d="M26 70h22l-3 24H29z" fill="#D6E6EF"/><path d="M30 70q-6-20 4-26 M37 70q0-24 6-28 M44 70q6-18 4-22" stroke="#9CC49A"/>`
+};
+
+let state = {cat:'all', sort:'rec', q:''};
+let cart = {};
+try{ cart = JSON.parse(localStorage.getItem('okie-cart')||'{}') || {}; }catch(e){ cart = {}; }
+const save = () => { try{ localStorage.setItem('okie-cart', JSON.stringify(cart)); }catch(e){} };
+const $ = id => document.getElementById(id);
+const money = n => '$' + n.toFixed(2);
+
+function renderNav(){
+  const all = [{id:'all',name:'全部'}, ...CATS];
+  const tpl = (c, cls) => `<button class="${cls}" type="button" data-cat="${c.id}" aria-pressed="${state.cat===c.id}">${c.name}</button>`;
+  $('navTabs').innerHTML = [{id:'all',name:'首页'}].map(c=>`<button type="button" data-top aria-pressed="false">首页</button>`).join('') + all.map(c=>tpl(c,'')).join('');
+  $('chips').innerHTML = all.map(c=>tpl(c,'chip')).join('');
+}
+function renderCats(){
+  $('cats').innerHTML = CATS.map(c=>`<button class="cat" type="button" data-cat="${c.id}" data-jump>
+    <div class="cat-blob"><svg viewBox="0 0 120 110" aria-hidden="true">
+      <path d="M20 30q10-24 40-20q34-6 44 20q14 30-6 52q-20 22-50 16q-30-4-34-32q-4-20 6-36z" fill="#F4D7DC" opacity=".55"/>
+      <g stroke="#6E4B3E" stroke-width="2.5" stroke-linejoin="round" stroke-linecap="round" fill="none">${CAT_ICONS[c.id]}</g>
+    </svg></div><span>${c.name}</span></button>`).join('');
+}
+function visible(){
+  let list = PRODUCTS.filter(p=>{
+    if(state.cat==='sale' && !p.sale) return false;
+    if(state.cat!=='all' && state.cat!=='sale' && p.cat!==state.cat) return false;
+    if(state.q && !p.name.toLowerCase().includes(state.q.toLowerCase())) return false;
+    return true;
+  });
+  if(state.sort==='asc') list = [...list].sort((a,b)=>a.price-b.price);
+  if(state.sort==='desc') list = [...list].sort((a,b)=>b.price-a.price);
+  return list;
+}
+function renderGrid(){
+  const list = visible();
+  $('grid').innerHTML = list.length ? list.map(p=>`<article class="card">
+    <div class="thumb">${art(p)}${p.sale?'<span class="tag">折扣</span>':''}${p.soldOut?'<div class="stamp"><b>已售罄</b></div>':''}</div>
+    <div class="info"><h3>${p.name}</h3>
+      <div class="row"><span class="price">${money(p.price)}${p.old?`<s>${money(p.old)}</s>`:''}</span>
+      <button class="add" type="button" data-add="${p.id}" ${p.soldOut?'disabled aria-label="已售罄"':`aria-label="把 ${p.name} 加入购物车"`}>
+        <svg viewBox="0 0 24 24" fill="none" stroke="#fff" stroke-width="3" stroke-linecap="round"><path d="M12 5v14M5 12h14"/></svg></button></div>
+    </div></article>`).join('')
+  : `<div class="empty">没有找到“${state.q}”相关的商品。换个关键词，或者<br><button class="chip" type="button" data-reset>查看全部商品</button></div>`;
+  document.querySelectorAll('[data-cat]').forEach(b=>{ if(b.getAttribute('aria-pressed')!==null) b.setAttribute('aria-pressed', b.dataset.cat===state.cat); });
+}
+function renderCart(){
+  const ids = Object.keys(cart).filter(id=>cart[id]>0);
+  const count = ids.reduce((s,id)=>s+cart[id],0);
+  const total = ids.reduce((s,id)=>s+cart[id]*PRODUCTS.find(p=>p.id==id).price,0);
+  $('count').textContent = count;
+  $('total').textContent = money(total);
+  const left = FREE - total;
+  $('ship').innerHTML = (left>0 ? `再买 <b>${money(left)}</b> 就能包邮` : '已满 $169，本单包邮 🎉') + `<div class="bar"><i style="width:${Math.min(100,total/FREE*100)}%"></i></div>`;
+  $('items').innerHTML = ids.length ? ids.map(id=>{ const p = PRODUCTS.find(x=>x.id==id); return `<div class="item">${art(p)}
+    <div><h3>${p.name}</h3><div class="p">${money(p.price)}</div></div>
+    <div class="qty"><button type="button" data-dec="${id}" aria-label="减少">−</button><span>${cart[id]}</span><button type="button" data-inc="${id}" aria-label="增加">+</button></div></div>`; }).join('')
+  : '<div class="cart-empty">购物车还是空的<br>去挑几样毛孩子喜欢的吧</div>';
+  $('checkout').disabled = !ids.length;
+  $('note').textContent = '';
+  save();
+}
+function openCart(o){ document.body.classList.toggle('open', o); if(o) $('closeCart').focus(); }
+
+document.addEventListener('click', e=>{
+  const t = e.target.closest('button'); if(!t) return;
+  if(t.dataset.cat){ state.cat = t.dataset.cat; renderGrid(); if('jump' in t.dataset || t.closest('.nav')) $('products').scrollIntoView({behavior:'smooth'}); }
+  if(t.dataset.jump==='all'){ state.cat='all'; renderGrid(); $('products').scrollIntoView({behavior:'smooth'}); }
+  if('top' in t.dataset) window.scrollTo({top:0,behavior:'smooth'});
+  if('reset' in t.dataset){ state={cat:'all',sort:state.sort,q:''}; $('q').value=''; renderGrid(); }
+  if(t.dataset.add){ cart[t.dataset.add]=(cart[t.dataset.add]||0)+1; renderCart(); openCart(true); }
+  if(t.dataset.inc){ cart[t.dataset.inc]++; renderCart(); }
+  if(t.dataset.dec){ cart[t.dataset.dec]--; if(cart[t.dataset.dec]<=0) delete cart[t.dataset.dec]; renderCart(); }
+  if(t.id==='openCart') openCart(true);
+  if(t.id==='closeCart') openCart(false);
+  if(t.id==='checkout') $('note').textContent = '结算需要接入支付系统后才能使用（这里是设计预览）';
+});
+$('scrim').addEventListener('click', ()=>openCart(false));
+document.addEventListener('keydown', e=>{ if(e.key==='Escape') openCart(false); });
+$('q').addEventListener('input', e=>{ state.q = e.target.value.trim(); renderGrid(); });
+$('q').addEventListener('keydown', e=>{ if(e.key==='Enter') $('products').scrollIntoView({behavior:'smooth'}); });
+$('sort').addEventListener('change', e=>{ state.sort = e.target.value; renderGrid(); });
+
+renderNav(); renderCats(); renderGrid(); renderCart();
+</script>
+</body>
+</html>

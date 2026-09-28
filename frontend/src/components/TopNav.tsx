@@ -1,53 +1,80 @@
-import { NavLink } from "react-router-dom";
+import { Link, NavLink } from "react-router-dom";
 import SearchBar from "./SearchBar";
+import { CATEGORIES } from "../data/categories";
 import "./TopNav.css";
 
 export default function TopNav() {
   return (
-    <header className="top-nav">
-      <div className="top-nav__inner container">
-        <NavLink to="/" end className="top-nav__logo">
-          Okie Pet
-        </NavLink>
+    <>
+      <header className="top-nav">
+        <div className="top-nav__inner container">
+          <Link to="/" className="top-nav__logo">
+            <PawIcon />
+            Okie Pet
+          </Link>
 
-        <nav className="top-nav__links">
+          <div className="top-nav__search">
+            <SearchBar />
+          </div>
+
+          <div className="top-nav__actions">
+            <NavLink
+              to="/account"
+              className={({ isActive }) =>
+                "top-nav__icon-link" + (isActive ? " is-active" : "")
+              }
+            >
+              <UserIcon />
+              <span className="top-nav__icon-label">个人中心</span>
+            </NavLink>
+            <NavLink
+              to="/cart"
+              className={({ isActive }) =>
+                "top-nav__icon-link" + (isActive ? " is-active" : "")
+              }
+            >
+              <CartIcon />
+              <span className="top-nav__icon-label">购物车</span>
+              <span className="top-nav__badge">0</span>
+            </NavLink>
+          </div>
+        </div>
+      </header>
+
+      <nav className="cat-nav" aria-label="商品分类">
+        <div className="cat-nav__inner container">
           <NavLink to="/" end className={({ isActive }) => (isActive ? "is-active" : "")}>
             首页
           </NavLink>
           <NavLink
             to="/products"
+            end
             className={({ isActive }) => (isActive ? "is-active" : "")}
           >
-            商品
+            全部
           </NavLink>
-        </nav>
-
-        <div className="top-nav__search">
-          <SearchBar />
+          {CATEGORIES.map((c) => (
+            <Link key={c.id} to={`/products?cat=${c.id}`}>
+              {c.label}
+            </Link>
+          ))}
         </div>
+      </nav>
+    </>
+  );
+}
 
-        <div className="top-nav__actions">
-          <NavLink
-            to="/cart"
-            aria-label="购物车"
-            className={({ isActive }) =>
-              "top-nav__icon-link" + (isActive ? " is-active" : "")
-            }
-          >
-            <CartIcon />
-          </NavLink>
-          <NavLink
-            to="/account"
-            aria-label="个人中心"
-            className={({ isActive }) =>
-              "top-nav__icon-link" + (isActive ? " is-active" : "")
-            }
-          >
-            <UserIcon />
-          </NavLink>
-        </div>
-      </div>
-    </header>
+function PawIcon() {
+  return (
+    <svg viewBox="0 0 40 40" width="26" height="26" aria-hidden="true">
+      <g fill="currentColor">
+        <ellipse cx="20" cy="26" rx="9" ry="7.5" />
+        <circle cx="9" cy="16" r="4" />
+        <circle cx="16" cy="9" r="4" />
+        <circle cx="24" cy="9" r="4" />
+        <circle cx="31" cy="16" r="4" />
+      </g>
+    </svg>
   );
 }
 
@@ -55,14 +82,14 @@ function CartIcon() {
   return (
     <svg viewBox="0 0 24 24" width="21" height="21" fill="none">
       <path
-        d="M3 4h2l2.4 12.2a2 2 0 0 0 2 1.6h7.2a2 2 0 0 0 2-1.6L20 8H6"
+        d="M3 4h2.5l2.2 11h10.6L20.5 7H7"
         stroke="currentColor"
-        strokeWidth="1.8"
+        strokeWidth="2"
         strokeLinecap="round"
         strokeLinejoin="round"
       />
-      <circle cx="10" cy="20.5" r="1.4" fill="currentColor" />
-      <circle cx="17" cy="20.5" r="1.4" fill="currentColor" />
+      <circle cx="9" cy="19.5" r="1.5" fill="currentColor" />
+      <circle cx="17" cy="19.5" r="1.5" fill="currentColor" />
     </svg>
   );
 }
@@ -70,11 +97,11 @@ function CartIcon() {
 function UserIcon() {
   return (
     <svg viewBox="0 0 24 24" width="21" height="21" fill="none">
-      <circle cx="12" cy="8" r="3.4" stroke="currentColor" strokeWidth="1.8" />
+      <circle cx="12" cy="8" r="4" stroke="currentColor" strokeWidth="2" />
       <path
-        d="M4.5 20c1.4-3.6 4.3-5.4 7.5-5.4s6.1 1.8 7.5 5.4"
+        d="M4 21c1.5-4 4.5-6 8-6s6.5 2 8 6"
         stroke="currentColor"
-        strokeWidth="1.8"
+        strokeWidth="2"
         strokeLinecap="round"
       />
     </svg>
