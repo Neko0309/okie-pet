@@ -1,0 +1,50 @@
+import uuid
+from typing import Literal
+
+from fastapi import APIRouter, Depends, HTTPException, Query
+from sqlalchemy import func, select
+from sqlalchemy.orm import Session
+
+from app.core.database import get_db
+from app.models.product import Product
+from app.schemas.product import ProductListOut, ProductOut
+
+router = APIRouter(prefix="/products", tags=["products"])
+
+SortMode = Literal["recommended", "price-asc", "price-desc"]
+
+
+@router.get("", response_model=ProductListOut)
+def list_products(
+    category: str | None = Query(default=None),
+    sort: SortMode = Query(default="recommended"),
+    skip: int = Query(default=0, ge=0),
+    limit: int = Query(default=24, ge=1, le=100),
+    db: Session = Depends(get_db),
+):
+    stmt = select(Product).where(Product.is_active.is_(True))
+
+    if category == "deals":
+        stmt = stmt.where(Product.old_price.is_not(None))
+    elif category:
+        stmt = stmt.where(Product.category == category)
+
+    if sort == "price-asc":
+        stmt = stmt.order_by(Product.price.asc())
+    elif sort == "price-desc":
+        stmt = stmt.order_by(Product.price.desc())
+    else:
+        stmt = stmt.order_by(Product.created_at.desc())
+
+    total = db.scalar(select(func.count()).select_from(stmt.subquery()))
+    items = db.scalars(stmt.offset(skip).limit(limit)).all()
+
+    return ProductListOut(items=items, total=total or 0, skip=skip, limit=limit)
+
+
+@router.get("/{product_id}", response_model=ProductOut)
+def get_product(product_id: uuid.UUID, db: Session = Depends(get_db)):
+    product = db.get(Product, product_id)
+    if product is None or not product.is_active:
+        raise HTTPException(status_code=404, detail="Product not found")
+    return product

@@ -1,13 +1,8 @@
-"""One-off import: pull the real product catalog out of the Pisell admin API
-and load it into our own `products` table.
-
-This is NOT a live sync. Pisell doesn't expose a self-serve API-key /
-developer program (as far as we've found) — the only access we have is a
-bearer token tied to an interactive merchant login session, which expires
-and isn't something that belongs hardcoded into the app. So this script is
-meant to be run by hand, once (or occasionally, by hand), with a fresh token
-supplied via environment variables at run time. Nothing here should ever be
-committed with real credentials in it.
+"""One-off import: pull the product catalog directly from the Pisell admin
+API. Kept as a fallback — the primary, ongoing way we sync stock is
+scripts/import_from_excel.py, driven by manually re-exported spreadsheets
+(Pisell has no self-serve API-key program, so a bearer token from an
+interactive login session isn't something we want to depend on long-term).
 
 Usage:
     PISELL_TOKEN="<bearer token from a logged-in browser session>" \
@@ -22,68 +17,22 @@ call to pro.pisellapi.com.
 
 import os
 import sys
-from decimal import Decimal, InvalidOperation
 
 import requests
-from sqlalchemy import select
 
 sys.path.append(os.path.dirname(os.path.dirname(os.path.abspath(__file__))))
 
 from app.core.database import SessionLocal  # noqa: E402
-from app.models.product import Product  # noqa: E402
+from app.services.catalog_sync import (  # noqa: E402
+    ProductInput,
+    deactivate_missing,
+    to_decimal,
+    upsert_product,
+)
 
 API_BASE = "https://pro.pisellapi.com/shop/product/product"
 PAGE_SIZE = 100
-
-# Pisell's free-text Chinese category names -> our storefront's CategoryId.
-# "deals" isn't a real Pisell category; discounted items are detected from
-# original_price/price instead, matching how the frontend already treats it.
-CATEGORY_MAP = {
-    "猫抓板": "supplies",
-    "猫抓柱": "supplies",
-    "宠物冰垫": "supplies",
-    "宠物玩具": "supplies",
-    "猫玩具": "supplies",
-    "狗玩具": "supplies",
-    "清洁用品": "supplies",
-    "保健品": "supplies",
-    "猫砂": "supplies",
-    "主粮伴侣": "staple",
-    "狗粮": "staple",
-    "主粮": "staple",
-    "宠物食品": "staple",
-    "狗零食": "snacks",
-    "小包·果蔬干": "snacks",
-    "小包·纯肉干": "snacks",
-    "大包·果蔬干": "snacks",
-    "零食": "snacks",
-    "狗罐头": "canned",
-    "狗罐": "canned",
-    "汤罐": "canned",
-    "汤包": "canned",
-    "餐包": "canned",
-    "餐盒": "canned",
-    "罐头": "canned",
-    "冻干": "freeze-dried",
-    "冻干零食": "freeze-dried",
-}
-DEFAULT_CATEGORY = "supplies"
-
-
-def map_category(pisell_categories: list[dict]) -> str:
-    for cat in pisell_categories:
-        mapped = CATEGORY_MAP.get(cat.get("name", ""))
-        if mapped:
-            return mapped
-    return DEFAULT_CATEGORY
-
-
-def to_decimal(value) -> Decimal | None:
-    try:
-        d = Decimal(str(value))
-        return d if d > 0 else None
-    except (InvalidOperation, TypeError):
-        return None
+EXTERNAL_SOURCE = "pisell"
 
 
 def fetch_all_products(token: str, merchant_domain: str) -> list[dict]:
@@ -111,53 +60,28 @@ def fetch_all_products(token: str, merchant_domain: str) -> list[dict]:
     return products
 
 
-def cheapest_variant_price(raw: dict) -> Decimal | None:
-    prices = [to_decimal(v.get("price")) for v in raw.get("variant") or []]
-    prices = [p for p in prices if p]
-    return min(prices) if prices else None
-
-
-def upsert_product(db, raw: dict) -> bool:
-    """Returns True if a new row was created, False if an existing one was updated."""
-    external_id = str(raw["id"])
-
-    # Multi-variant products often leave the parent's base_price/price at 0
-    # and only set real prices on each variant — fall back to the cheapest
-    # variant so we don't import a $0 product.
+def to_product_input(raw: dict) -> ProductInput:
     price = to_decimal(raw.get("base_price") or raw.get("price"))
     if price is None:
-        price = cheapest_variant_price(raw) or Decimal("0.00")
+        variant_prices = [to_decimal(v.get("price")) for v in raw.get("variant") or []]
+        variant_prices = [p for p in variant_prices if p]
+        price = min(variant_prices) if variant_prices else 0
 
-    original_price = to_decimal(raw.get("original_price"))
-    old_price = original_price if original_price and original_price > price else None
-    stock = raw.get("sum_stock", raw.get("stock_quantity", 0)) or 0
     vendor_list = raw.get("vendor") or []
-    vendor = vendor_list[0]["name"] if vendor_list else None
+    category_list = raw.get("category") or []
 
-    existing = db.scalar(
-        select(Product).where(
-            Product.external_source == "pisell", Product.external_id == external_id
-        )
-    )
-
-    fields = dict(
+    return ProductInput(
+        external_id=str(raw["id"]),
+        external_source=EXTERNAL_SOURCE,
         name=raw["title"],
         price=price,
-        old_price=old_price,
-        stock_quantity=stock,
-        category=map_category(raw.get("category") or []),
-        vendor=vendor,
+        original_price=to_decimal(raw.get("original_price")),
+        stock_quantity=raw.get("sum_stock", raw.get("stock_quantity", 0)) or 0,
+        category_names=[c.get("name") for c in category_list if c.get("name")],
+        vendor=vendor_list[0]["name"] if vendor_list else None,
         image_url=raw.get("cover") or None,
         is_active=raw.get("status") == "published",
     )
-
-    if existing:
-        for key, value in fields.items():
-            setattr(existing, key, value)
-        return False
-
-    db.add(Product(external_source="pisell", external_id=external_id, **fields))
-    return True
 
 
 def main():
@@ -174,16 +98,20 @@ def main():
     created = updated = 0
     db = SessionLocal()
     try:
-        for raw in raw_products:
-            if upsert_product(db, raw):
+        items = [to_product_input(raw) for raw in raw_products]
+        for item in items:
+            if upsert_product(db, item):
                 created += 1
             else:
                 updated += 1
+        deactivated = deactivate_missing(
+            db, EXTERNAL_SOURCE, {i.external_id for i in items}
+        )
         db.commit()
     finally:
         db.close()
 
-    print(f"Done. Created {created}, updated {updated}.")
+    print(f"Done. Created {created}, updated {updated}, deactivated {deactivated}.")
 
 
 if __name__ == "__main__":

@@ -1,13 +1,21 @@
+import { useEffect, useState } from "react";
 import { Link } from "react-router-dom";
 import { useTranslation } from "react-i18next";
 import CategoryTile from "../components/CategoryTile";
 import ProductCard from "../components/ProductCard";
 import { CATEGORIES } from "../data/categories";
-import { MOCK_PRODUCTS } from "../data/mockProducts";
+import { fetchProducts, type ApiProduct } from "../lib/products";
 import "./Home.css";
 
 export default function Home() {
   const { t } = useTranslation();
+  const [products, setProducts] = useState<ApiProduct[]>([]);
+
+  useEffect(() => {
+    fetchProducts({ limit: 10 })
+      .then((res) => setProducts(res.items))
+      .catch(() => setProducts([]));
+  }, []);
 
   return (
     <div className="home">
@@ -53,7 +61,7 @@ export default function Home() {
           <div className="doodle" />
         </div>
         <div className="home__product-grid">
-          {MOCK_PRODUCTS.map((p) => (
+          {products.map((p) => (
             <ProductCard key={p.id} product={p} compact />
           ))}
         </div>

@@ -64,3 +64,20 @@ npm run dev
 ```
 
 App available at `http://localhost:5173`.
+
+## Catalog data
+
+Pisell (the platform powering the existing storefront) doesn't offer a
+self-serve API-key/developer program, so the product catalog isn't synced
+live. Instead:
+
+1. Export the current stock from the Pisell admin ("All records" export).
+2. Drop the `.xlsx` file in `backend/imports/` (gitignored).
+3. Run `python scripts/import_from_excel.py backend/imports/<file>.xlsx`
+   from `backend/` (with the venv active).
+
+This upserts by Pisell's product ID, so re-running with a newer export
+updates prices/stock in place and marks anything no longer in the file as
+inactive. See `backend/scripts/import_from_excel.py` for details, and
+`backend/scripts/import_pisell_products.py` for an API-based alternative
+that needs a bearer token pulled from an active admin login session.

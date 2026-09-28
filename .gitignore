@@ -9,6 +9,10 @@ backend/**/__pycache__/
 backend/.env
 frontend/.env
 
+# Pisell stock export files dropped here for re-import (real inventory
+# data, changes constantly — not meant to be version controlled)
+backend/imports/
+
 # Node / frontend
 frontend/node_modules/
 frontend/dist/

@@ -1,6 +1,5 @@
 import { useTranslation } from "react-i18next";
-import type { Product } from "../data/mockProducts";
-import ProductArt from "./ProductArt";
+import type { ApiProduct } from "../lib/products";
 import "./ProductCard.css";
 
 export default function ProductCard({
@@ -8,25 +7,29 @@ export default function ProductCard({
   compact = false,
   onAdd,
 }: {
-  product: Product;
+  product: ApiProduct;
   compact?: boolean;
-  onAdd?: (product: Product) => void;
+  onAdd?: (product: ApiProduct) => void;
 }) {
   const { t } = useTranslation();
+  const price = Number(product.price);
+  const oldPrice = product.old_price ? Number(product.old_price) : null;
+  const soldOut = product.stock_quantity <= 0;
 
   return (
     <div className={"product-card" + (compact ? " is-compact" : "")}>
       <div className="product-card__image">
-        <ProductArt
-          shape={product.shape}
-          color={product.color}
-          label={product.label}
-          name={product.name}
-        />
-        {product.discount && (
+        {product.image_url ? (
+          <img src={product.image_url} alt={product.name} loading="lazy" />
+        ) : (
+          <div className="product-card__placeholder" aria-hidden="true">
+            🐾
+          </div>
+        )}
+        {oldPrice && (
           <span className="product-card__tag">{t("product_card.tag_discount")}</span>
         )}
-        {product.soldOut && (
+        {soldOut && (
           <div className="product-card__stamp">
             <b>{t("product_card.stamp_sold_out")}</b>
           </div>
@@ -36,21 +39,17 @@ export default function ProductCard({
         <p className="product-card__name">{product.name}</p>
         <div className="product-card__row">
           <span className="product-card__price">
-            ${product.price.toFixed(2)}
-            {product.oldPrice && (
-              <s className="product-card__old-price">
-                ${product.oldPrice.toFixed(2)}
-              </s>
-            )}
+            ${price.toFixed(2)}
+            {oldPrice && <s className="product-card__old-price">${oldPrice.toFixed(2)}</s>}
           </span>
           {!compact && (
             <button
               type="button"
               className="product-card__add"
-              disabled={product.soldOut}
+              disabled={soldOut}
               onClick={() => onAdd?.(product)}
               aria-label={
-                product.soldOut
+                soldOut
                   ? t("product_card.sold_out_aria")
                   : `${t("product_card.add_to_cart")}: ${product.name}`
               }

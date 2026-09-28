@@ -1,12 +1,10 @@
-import { useMemo, useState } from "react";
+import { useEffect, useState } from "react";
 import { useSearchParams } from "react-router-dom";
 import { useTranslation } from "react-i18next";
 import ProductCard from "../components/ProductCard";
 import { CATEGORIES, type CategoryId } from "../data/categories";
-import { MOCK_PRODUCTS } from "../data/mockProducts";
+import { fetchProducts, type ApiProduct, type SortMode } from "../lib/products";
 import "./Products.css";
-
-type SortMode = "recommended" | "price-asc" | "price-desc";
 
 const SORT_CYCLE: SortMode[] = ["recommended", "price-asc", "price-desc"];
 
@@ -18,6 +16,8 @@ export default function Products() {
     initialCategory ?? "all",
   );
   const [sortMode, setSortMode] = useState<SortMode>("recommended");
+  const [products, setProducts] = useState<ApiProduct[]>([]);
+  const [loading, setLoading] = useState(true);
 
   const SORT_LABELS: Record<SortMode, string> = {
     recommended: t("products.sort_recommended"),
@@ -25,19 +25,12 @@ export default function Products() {
     "price-desc": t("products.sort_price_desc"),
   };
 
-  const products = useMemo(() => {
-    let list = MOCK_PRODUCTS;
-    if (activeCategory === "deals") {
-      list = list.filter((p) => p.discount);
-    } else if (activeCategory !== "all") {
-      list = list.filter((p) => p.category === activeCategory);
-    }
-    if (sortMode === "price-asc") {
-      list = [...list].sort((a, b) => a.price - b.price);
-    } else if (sortMode === "price-desc") {
-      list = [...list].sort((a, b) => b.price - a.price);
-    }
-    return list;
+  useEffect(() => {
+    setLoading(true);
+    fetchProducts({ category: activeCategory, sort: sortMode, limit: 100 })
+      .then((res) => setProducts(res.items))
+      .catch(() => setProducts([]))
+      .finally(() => setLoading(false));
   }, [activeCategory, sortMode]);
 
   function cycleSort() {
@@ -73,14 +66,16 @@ export default function Products() {
         </button>
       </header>
 
-      <div className="products__grid">
-        {products.map((p) => (
-          <ProductCard key={p.id} product={p} />
-        ))}
-        {products.length === 0 && (
-          <p className="products__empty">{t("products.empty")}</p>
-        )}
-      </div>
+      {!loading && (
+        <div className="products__grid">
+          {products.map((p) => (
+            <ProductCard key={p.id} product={p} />
+          ))}
+          {products.length === 0 && (
+            <p className="products__empty">{t("products.empty")}</p>
+          )}
+        </div>
+      )}
     </div>
   );
 }
