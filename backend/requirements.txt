@@ -7,6 +7,11 @@ pydantic==2.10.4
 pydantic-settings==2.7.0
 email-validator==2.2.0
 python-jose[cryptography]==3.3.0
+# Pinned below python-jose's transitive default: cryptography>=44 ships a
+# precompiled wheel whose OpenSSL binding crashes with SIGILL when run
+# under Docker Desktop's virtualized ARM64 (reproduced 2026-09-29, not an
+# issue on bare macOS — only shows up once containerized).
+cryptography==43.0.3
 bcrypt==4.2.1
 python-multipart==0.0.20
 stripe==11.4.1
