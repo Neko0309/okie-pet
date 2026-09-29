@@ -108,3 +108,38 @@ export async function fetchAdminOrders(params: {
   });
   return res.data;
 }
+
+export async function exportAdminProducts(): Promise<void> {
+  const res = await api.get("/admin/products/export", {
+    headers: authHeaders(),
+    responseType: "blob",
+  });
+
+  const disposition = res.headers["content-disposition"] as string | undefined;
+  const filename = disposition?.match(/filename="?([^"]+)"?/)?.[1] ?? "okiepet-products.xlsx";
+
+  const url = URL.createObjectURL(res.data as Blob);
+  const link = document.createElement("a");
+  link.href = url;
+  link.download = filename;
+  document.body.appendChild(link);
+  link.click();
+  link.remove();
+  URL.revokeObjectURL(url);
+}
+
+export interface AdminImportResult {
+  created: number;
+  updated: number;
+  deactivated: number;
+  total_rows: number;
+}
+
+export async function importAdminProducts(file: File): Promise<AdminImportResult> {
+  const formData = new FormData();
+  formData.append("file", file);
+  const res = await api.post<AdminImportResult>("/admin/products/import", formData, {
+    headers: authHeaders(),
+  });
+  return res.data;
+}

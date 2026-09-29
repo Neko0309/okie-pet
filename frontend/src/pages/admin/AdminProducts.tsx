@@ -1,5 +1,10 @@
-import { useEffect, useState } from "react";
-import { fetchAdminProducts, type AdminProduct } from "../../lib/admin";
+import { useEffect, useRef, useState } from "react";
+import {
+  exportAdminProducts,
+  fetchAdminProducts,
+  importAdminProducts,
+  type AdminProduct,
+} from "../../lib/admin";
 import AdminProductModal from "./AdminProductModal";
 import "./AdminProducts.css";
 
@@ -8,6 +13,10 @@ export default function AdminProducts() {
   const [search, setSearch] = useState("");
   const [loading, setLoading] = useState(true);
   const [editing, setEditing] = useState<AdminProduct | null>(null);
+  const [exporting, setExporting] = useState(false);
+  const [importing, setImporting] = useState(false);
+  const [importMessage, setImportMessage] = useState<string | null>(null);
+  const fileInputRef = useRef<HTMLInputElement>(null);
 
   function load() {
     setLoading(true);
@@ -15,6 +24,38 @@ export default function AdminProducts() {
       .then((res) => setProducts(res.items))
       .catch(() => setProducts([]))
       .finally(() => setLoading(false));
+  }
+
+  async function handleExport() {
+    setExporting(true);
+    try {
+      await exportAdminProducts();
+    } catch {
+      setImportMessage("Export failed.");
+    } finally {
+      setExporting(false);
+    }
+  }
+
+  async function handleImportFile(e: React.ChangeEvent<HTMLInputElement>) {
+    const file = e.target.files?.[0];
+    e.target.value = "";
+    if (!file) return;
+
+    setImporting(true);
+    setImportMessage(null);
+    try {
+      const result = await importAdminProducts(file);
+      setImportMessage(
+        `Imported ${result.total_rows} rows: ${result.created} created, ` +
+          `${result.updated} updated, ${result.deactivated} deactivated.`,
+      );
+      load();
+    } catch {
+      setImportMessage("Import failed — check the file matches the expected format.");
+    } finally {
+      setImporting(false);
+    }
   }
 
   useEffect(() => {
@@ -30,12 +71,35 @@ export default function AdminProducts() {
 
   return (
     <div className="admin-products">
-      <input
-        className="admin-products__search"
-        placeholder="Search by name…"
-        value={search}
-        onChange={(e) => setSearch(e.target.value)}
-      />
+      <div className="admin-products__toolbar">
+        <input
+          className="admin-products__search"
+          placeholder="Search by name…"
+          value={search}
+          onChange={(e) => setSearch(e.target.value)}
+        />
+        <div className="admin-products__io">
+          <button type="button" onClick={handleExport} disabled={exporting}>
+            {exporting ? "Exporting…" : "Export .xlsx"}
+          </button>
+          <button
+            type="button"
+            onClick={() => fileInputRef.current?.click()}
+            disabled={importing}
+          >
+            {importing ? "Importing…" : "Import .xlsx"}
+          </button>
+          <input
+            ref={fileInputRef}
+            type="file"
+            accept=".xlsx"
+            hidden
+            onChange={handleImportFile}
+          />
+        </div>
+      </div>
+
+      {importMessage && <p className="admin-products__import-message">{importMessage}</p>}
 
       {!loading && (
         <table className="admin-table">

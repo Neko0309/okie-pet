@@ -10,6 +10,9 @@ python-jose[cryptography]==3.3.0
 bcrypt==4.2.1
 python-multipart==0.0.20
 stripe==11.4.1
+openpyxl==3.1.5
+deep-translator==1.11.4
+beautifulsoup4==4.15.0
 
 # dev
 pytest==8.3.4

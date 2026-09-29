@@ -12,6 +12,9 @@ app.add_middleware(
     allow_credentials=True,
     allow_methods=["*"],
     allow_headers=["*"],
+    # Cross-origin JS can't read this header by default; the admin export
+    # button needs it to name the downloaded file correctly.
+    expose_headers=["Content-Disposition"],
 )
 
 app.include_router(health.router, prefix="/api")

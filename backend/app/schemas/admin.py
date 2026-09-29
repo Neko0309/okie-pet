@@ -67,3 +67,10 @@ class AdminOrderOut(BaseModel):
     customer_email: str
     customer_name: str
     items: list[AdminOrderItemOut]
+
+
+class AdminImportResult(BaseModel):
+    created: int
+    updated: int
+    deactivated: int
+    total_rows: int

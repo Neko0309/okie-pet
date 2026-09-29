@@ -1,6 +1,9 @@
+import io
 import uuid
+from datetime import datetime, timezone
 
-from fastapi import APIRouter, Depends, HTTPException, Query
+from fastapi import APIRouter, Depends, HTTPException, Query, UploadFile
+from fastapi.responses import StreamingResponse
 from sqlalchemy import select
 from sqlalchemy.orm import Session, selectinload
 
@@ -9,12 +12,15 @@ from app.core.deps import get_current_admin
 from app.models.order import Order
 from app.models.product import Product, ProductVariant
 from app.schemas.admin import (
+    AdminImportResult,
     AdminOrderOut,
     AdminProductListOut,
     AdminProductOut,
     AdminProductUpdate,
     AdminVariantUpdate,
 )
+from app.services.catalog_sync import deactivate_missing, upsert_product
+from app.services.excel_io import EXTERNAL_SOURCE, build_products, export_workbook, load_rows
 
 router = APIRouter(prefix="/admin", tags=["admin"], dependencies=[Depends(get_current_admin)])
 
@@ -42,6 +48,42 @@ def list_products(
     items = all_matching[skip : skip + limit]
 
     return AdminProductListOut(items=items, total=total, skip=skip, limit=limit)
+
+
+@router.get("/products/export")
+def export_products(db: Session = Depends(get_db)):
+    # Same column shape as a Pisell "All records" export (see excel_io.py),
+    # so the downloaded file can be edited in Excel and re-uploaded via
+    # /products/import, or handed straight to scripts/import_from_excel.py.
+    products = db.scalars(
+        select(Product).options(selectinload(Product.variants)).order_by(Product.name)
+    ).all()
+    buffer = export_workbook(products)
+    filename = f"okiepet-products-{datetime.now(timezone.utc):%Y%m%d}.xlsx"
+    return StreamingResponse(
+        buffer,
+        media_type="application/vnd.openxmlformats-officedocument.spreadsheetml.sheet",
+        headers={"Content-Disposition": f'attachment; filename="{filename}"'},
+    )
+
+
+@router.post("/products/import", response_model=AdminImportResult)
+def import_products(file: UploadFile, db: Session = Depends(get_db)):
+    rows = load_rows(io.BytesIO(file.file.read()))
+    items = build_products(rows)
+
+    created = updated = 0
+    for item in items:
+        if upsert_product(db, item):
+            created += 1
+        else:
+            updated += 1
+    deactivated = deactivate_missing(db, EXTERNAL_SOURCE, {i.external_id for i in items})
+    db.commit()
+
+    return AdminImportResult(
+        created=created, updated=updated, deactivated=deactivated, total_rows=len(rows)
+    )
 
 
 @router.patch("/products/{product_id}", response_model=AdminProductOut)
