@@ -4,11 +4,13 @@ import { useTranslation } from "react-i18next";
 import CategoryTile from "../components/CategoryTile";
 import ProductCard from "../components/ProductCard";
 import { CATEGORIES } from "../data/categories";
-import { fetchProducts, type ApiProduct } from "../lib/products";
+import { fetchProducts, type ApiProduct, type ApiVariant } from "../lib/products";
+import { useCart } from "../lib/cart";
 import "./Home.css";
 
 export default function Home() {
   const { t } = useTranslation();
+  const { addItem } = useCart();
   const [products, setProducts] = useState<ApiProduct[]>([]);
 
   useEffect(() => {
@@ -16,6 +18,23 @@ export default function Home() {
       .then((res) => setProducts(res.items))
       .catch(() => setProducts([]));
   }, []);
+
+  function handleAdd(product: ApiProduct, variant: ApiVariant | null, quantity: number) {
+    addItem(
+      {
+        productId: product.id,
+        variantId: variant?.id ?? null,
+        name: product.name,
+        nameEn: product.name_en,
+        variantName: variant?.name ?? null,
+        variantNameEn: variant?.name_en ?? null,
+        price: Number(variant ? variant.price : product.price),
+        image: product.image_url,
+        maxQuantity: variant ? variant.stock_quantity : product.stock_quantity,
+      },
+      quantity,
+    );
+  }
 
   return (
     <div className="home">
@@ -62,7 +81,7 @@ export default function Home() {
         </div>
         <div className="home__product-grid">
           {products.map((p) => (
-            <ProductCard key={p.id} product={p} compact />
+            <ProductCard key={p.id} product={p} compact onAdd={handleAdd} />
           ))}
         </div>
       </div>

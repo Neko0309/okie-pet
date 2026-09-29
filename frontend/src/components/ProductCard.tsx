@@ -48,21 +48,19 @@ export default function ProductCard({
             ${price.toFixed(2)}
             {oldPrice && <s className="product-card__old-price">${oldPrice.toFixed(2)}</s>}
           </span>
-          {!compact && (
-            <button
-              type="button"
-              className="product-card__add"
-              disabled={soldOut}
-              onClick={() => setModalOpen(true)}
-              aria-label={
-                soldOut
-                  ? t("product_card.sold_out_aria")
-                  : `${t("product_card.add_to_cart")}: ${name}`
-              }
-            >
-              +
-            </button>
-          )}
+          <button
+            type="button"
+            className="product-card__add"
+            disabled={soldOut}
+            onClick={() => setModalOpen(true)}
+            aria-label={
+              soldOut
+                ? t("product_card.sold_out_aria")
+                : `${t("product_card.add_to_cart")}: ${name}`
+            }
+          >
+            +
+          </button>
         </div>
       </div>
 
