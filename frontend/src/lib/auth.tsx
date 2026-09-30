@@ -21,8 +21,13 @@ interface AuthContextValue {
   errorKey: string | null;
   /** raw detail message from the API, if the server provided one (not localized) */
   errorDetail: string | null;
+  /** set when login fails specifically because the account isn't verified yet */
+  unverifiedEmail: string | null;
   login: (email: string, password: string) => Promise<void>;
   register: (email: string, password: string, fullName: string) => Promise<void>;
+  verifyEmail: (email: string, code: string) => Promise<void>;
+  resendCode: (email: string) => Promise<void>;
+  clearUnverifiedEmail: () => void;
   logout: () => void;
 }
 
@@ -39,6 +44,7 @@ export function AuthProvider({ children }: { children: ReactNode }) {
   const [loading, setLoading] = useState(true);
   const [errorKey, setErrorKey] = useState<string | null>(null);
   const [errorDetail, setErrorDetail] = useState<string | null>(null);
+  const [unverifiedEmail, setUnverifiedEmail] = useState<string | null>(null);
 
   async function loadUser() {
     const token = localStorage.getItem(TOKEN_KEY);
@@ -65,6 +71,7 @@ export function AuthProvider({ children }: { children: ReactNode }) {
   async function login(email: string, password: string) {
     setErrorKey(null);
     setErrorDetail(null);
+    setUnverifiedEmail(null);
     try {
       const body = new URLSearchParams({ username: email, password });
       const res = await api.post<{ access_token: string }>("/auth/login", body, {
@@ -72,8 +79,12 @@ export function AuthProvider({ children }: { children: ReactNode }) {
       });
       localStorage.setItem(TOKEN_KEY, res.data.access_token);
       await loadUser();
-    } catch {
-      setErrorKey("account.error_login");
+    } catch (e: any) {
+      if (e?.response?.data?.detail === "email_not_verified") {
+        setUnverifiedEmail(email);
+      } else {
+        setErrorKey("account.error_login");
+      }
       throw new Error("login failed");
     }
   }
@@ -87,7 +98,6 @@ export function AuthProvider({ children }: { children: ReactNode }) {
         password,
         full_name: fullName,
       });
-      await login(email, password);
     } catch (e: any) {
       const detail = e?.response?.data?.detail;
       if (typeof detail === "string") {
@@ -99,6 +109,31 @@ export function AuthProvider({ children }: { children: ReactNode }) {
     }
   }
 
+  async function verifyEmail(email: string, code: string) {
+    setErrorKey(null);
+    setErrorDetail(null);
+    try {
+      const res = await api.post<{ access_token: string }>("/auth/verify-email", {
+        email,
+        code,
+      });
+      localStorage.setItem(TOKEN_KEY, res.data.access_token);
+      setUnverifiedEmail(null);
+      await loadUser();
+    } catch {
+      setErrorKey("account.error_verify");
+      throw new Error("verify failed");
+    }
+  }
+
+  async function resendCode(email: string) {
+    await api.post("/auth/resend-verification", { email });
+  }
+
+  function clearUnverifiedEmail() {
+    setUnverifiedEmail(null);
+  }
+
   function logout() {
     localStorage.removeItem(TOKEN_KEY);
     setUser(null);
@@ -106,7 +141,19 @@ export function AuthProvider({ children }: { children: ReactNode }) {
 
   return (
     <AuthContext.Provider
-      value={{ user, loading, errorKey, errorDetail, login, register, logout }}
+      value={{
+        user,
+        loading,
+        errorKey,
+        errorDetail,
+        unverifiedEmail,
+        login,
+        register,
+        verifyEmail,
+        resendCode,
+        clearUnverifiedEmail,
+        logout,
+      }}
     >
       {children}
     </AuthContext.Provider>

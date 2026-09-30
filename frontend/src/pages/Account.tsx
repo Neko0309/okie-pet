@@ -44,12 +44,21 @@ function ProfileCard() {
 
 function AuthForm() {
   const { t } = useTranslation();
-  const { login, register, errorKey, errorDetail } = useAuth();
+  const {
+    login,
+    register,
+    errorKey,
+    errorDetail,
+    unverifiedEmail,
+    resendCode,
+    clearUnverifiedEmail,
+  } = useAuth();
   const [mode, setMode] = useState<"login" | "register">("login");
   const [email, setEmail] = useState("");
   const [password, setPassword] = useState("");
   const [fullName, setFullName] = useState("");
   const [submitting, setSubmitting] = useState(false);
+  const [pendingVerifyEmail, setPendingVerifyEmail] = useState<string | null>(null);
 
   async function handleSubmit(e: FormEvent) {
     e.preventDefault();
@@ -59,12 +68,27 @@ function AuthForm() {
         await login(email, password);
       } else {
         await register(email, password, fullName);
+        setPendingVerifyEmail(email);
       }
     } catch {
-      // error surfaced via useAuth().errorKey / errorDetail
+      // error surfaced via useAuth().errorKey / errorDetail / unverifiedEmail
     } finally {
       setSubmitting(false);
     }
+  }
+
+  const verifyEmailTarget = pendingVerifyEmail ?? unverifiedEmail;
+  if (verifyEmailTarget) {
+    return (
+      <VerifyCodeForm
+        email={verifyEmailTarget}
+        onBack={() => {
+          setPendingVerifyEmail(null);
+          clearUnverifiedEmail();
+        }}
+        resendCode={resendCode}
+      />
+    );
   }
 
   const errorMessage = errorDetail ?? (errorKey ? t(errorKey) : null);
@@ -123,6 +147,82 @@ function AuthForm() {
                 : t("account.register")}
           </button>
         </form>
+      </div>
+    </div>
+  );
+}
+
+function VerifyCodeForm({
+  email,
+  onBack,
+  resendCode,
+}: {
+  email: string;
+  onBack: () => void;
+  resendCode: (email: string) => Promise<void>;
+}) {
+  const { t } = useTranslation();
+  const { verifyEmail, errorKey } = useAuth();
+  const [code, setCode] = useState("");
+  const [submitting, setSubmitting] = useState(false);
+  const [resendState, setResendState] = useState<"idle" | "sending" | "sent">("idle");
+
+  async function handleSubmit(e: FormEvent) {
+    e.preventDefault();
+    setSubmitting(true);
+    try {
+      await verifyEmail(email, code);
+    } catch {
+      // error surfaced via useAuth().errorKey
+    } finally {
+      setSubmitting(false);
+    }
+  }
+
+  async function handleResend() {
+    setResendState("sending");
+    try {
+      await resendCode(email);
+      setResendState("sent");
+    } catch {
+      setResendState("idle");
+    }
+  }
+
+  return (
+    <div className="account account--centered">
+      <div className="auth-card">
+        <p className="auth-card__verify-intro">
+          {t("account.verify_intro", { email })}
+        </p>
+        <form onSubmit={handleSubmit} className="auth-card__form">
+          <input
+            type="text"
+            inputMode="numeric"
+            placeholder={t("account.code_placeholder")}
+            value={code}
+            onChange={(e) => setCode(e.target.value)}
+            maxLength={6}
+            required
+          />
+          {errorKey && <p className="auth-card__error">{t(errorKey)}</p>}
+          <button type="submit" className="auth-card__submit" disabled={submitting}>
+            {submitting ? t("account.submitting") : t("account.verify_submit")}
+          </button>
+        </form>
+        <button
+          type="button"
+          className="auth-card__resend"
+          onClick={handleResend}
+          disabled={resendState === "sending"}
+        >
+          {resendState === "sent"
+            ? t("account.code_resent")
+            : t("account.resend_code")}
+        </button>
+        <button type="button" className="auth-card__back" onClick={onBack}>
+          {t("account.back")}
+        </button>
       </div>
     </div>
   );

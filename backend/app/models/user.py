@@ -21,3 +21,9 @@ class User(Base):
     created_at: Mapped[datetime] = mapped_column(
         DateTime(timezone=True), default=lambda: datetime.now(timezone.utc)
     )
+
+    is_verified: Mapped[bool] = mapped_column(Boolean, default=False)
+    verification_code_hash: Mapped[str | None] = mapped_column(String(64), nullable=True)
+    verification_code_expires_at: Mapped[datetime | None] = mapped_column(
+        DateTime(timezone=True), nullable=True
+    )

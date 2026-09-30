@@ -79,7 +79,14 @@
     "admin_badge": "Admin",
     "loading": "Loading…",
     "error_login": "Wrong email or password",
-    "error_register_default": "Registration failed, please try again"
+    "error_register_default": "Registration failed, please try again",
+    "error_verify": "Invalid or expired code",
+    "verify_intro": "We sent a code to {{email}} — enter it below",
+    "code_placeholder": "6-digit code",
+    "verify_submit": "Verify",
+    "resend_code": "Resend code",
+    "code_resent": "Code resent",
+    "back": "Back"
   },
   "footer": {
     "brand_desc": "A Melbourne-based pet supplies shop for cats and dogs.",

@@ -15,6 +15,11 @@ class Settings(BaseSettings):
     stripe_secret_key: str = ""
     stripe_webhook_secret: str = ""
 
+    # Empty in local dev by default: email.py falls back to printing the
+    # verification code to the console instead of actually sending it.
+    resend_api_key: str = ""
+    email_from: str = "Okie Pet <onboarding@resend.dev>"
+
     cors_origins: list[str] = ["http://localhost:5173"]
 
 

@@ -79,7 +79,14 @@
     "admin_badge": "管理员",
     "loading": "加载中…",
     "error_login": "邮箱或密码不对",
-    "error_register_default": "注册失败,请重试"
+    "error_register_default": "注册失败,请重试",
+    "error_verify": "验证码不对或已过期",
+    "verify_intro": "验证码已发送到 {{email}},请查收并输入",
+    "code_placeholder": "6位验证码",
+    "verify_submit": "验证",
+    "resend_code": "重新发送验证码",
+    "code_resent": "已重新发送",
+    "back": "返回"
   },
   "footer": {
     "brand_desc": "墨尔本本地宠物用品小店,专注猫狗的吃喝玩乐。",

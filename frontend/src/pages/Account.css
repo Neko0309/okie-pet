@@ -154,3 +154,26 @@
 .auth-card__submit:disabled {
   opacity: 0.6;
 }
+
+.auth-card__verify-intro {
+  font-size: 13.5px;
+  color: var(--color-ink-muted);
+  line-height: 1.5;
+}
+
+.auth-card__resend,
+.auth-card__back {
+  background: none;
+  border: none;
+  font-size: 12.5px;
+  color: var(--color-accent);
+  text-align: center;
+}
+
+.auth-card__resend:disabled {
+  opacity: 0.6;
+}
+
+.auth-card__back {
+  color: var(--color-ink-muted);
+}

@@ -1,3 +1,5 @@
+import hashlib
+import secrets
 from datetime import datetime, timedelta, timezone
 
 import bcrypt
@@ -6,6 +8,15 @@ from jose import JWTError, jwt
 from app.core.config import settings
 
 ALGORITHM = "HS256"
+VERIFICATION_CODE_TTL_MINUTES = 15
+
+
+def generate_verification_code() -> str:
+    return f"{secrets.randbelow(1_000_000):06d}"
+
+
+def hash_verification_code(code: str) -> str:
+    return hashlib.sha256(code.encode("utf-8")).hexdigest()
 
 
 def hash_password(password: str) -> str:
