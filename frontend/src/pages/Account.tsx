@@ -56,12 +56,53 @@ function AuthForm() {
   const [mode, setMode] = useState<"login" | "register">("login");
   const [email, setEmail] = useState("");
   const [password, setPassword] = useState("");
+  const [confirmPassword, setConfirmPassword] = useState("");
   const [fullName, setFullName] = useState("");
   const [submitting, setSubmitting] = useState(false);
   const [pendingVerifyEmail, setPendingVerifyEmail] = useState<string | null>(null);
+  const [fieldErrors, setFieldErrors] = useState<Record<string, string>>({});
+
+  const EMAIL_PATTERN = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
+
+  function switchMode(next: "login" | "register") {
+    setMode(next);
+    setFieldErrors({});
+  }
+
+  function clearFieldError(field: string) {
+    setFieldErrors((prev) => {
+      if (!(field in prev)) return prev;
+      const next = { ...prev };
+      delete next[field];
+      return next;
+    });
+  }
+
+  function validate(): Record<string, string> {
+    const errors: Record<string, string> = {};
+    if (!EMAIL_PATTERN.test(email)) {
+      errors.email = t("account.error_email_invalid");
+    }
+    if (password.length < 8) {
+      errors.password = t("account.error_password_too_short");
+    }
+    if (mode === "register") {
+      if (!fullName.trim()) {
+        errors.fullName = t("account.error_nickname_required");
+      }
+      if (confirmPassword !== password) {
+        errors.confirmPassword = t("account.error_password_mismatch");
+      }
+    }
+    return errors;
+  }
 
   async function handleSubmit(e: FormEvent) {
     e.preventDefault();
+    const errors = validate();
+    setFieldErrors(errors);
+    if (Object.keys(errors).length > 0) return;
+
     setSubmitting(true);
     try {
       if (mode === "login") {
@@ -100,44 +141,83 @@ function AuthForm() {
           <button
             type="button"
             className={mode === "login" ? "is-active" : ""}
-            onClick={() => setMode("login")}
+            onClick={() => switchMode("login")}
           >
             {t("account.login")}
           </button>
           <button
             type="button"
             className={mode === "register" ? "is-active" : ""}
-            onClick={() => setMode("register")}
+            onClick={() => switchMode("register")}
           >
             {t("account.register")}
           </button>
         </div>
 
-        <form onSubmit={handleSubmit} className="auth-card__form">
+        <form onSubmit={handleSubmit} className="auth-card__form" noValidate>
           {mode === "register" && (
-            <input
-              type="text"
-              placeholder={t("account.nickname_placeholder")}
-              value={fullName}
-              onChange={(e) => setFullName(e.target.value)}
-              required
-            />
+            <div className="auth-card__field">
+              <input
+                type="text"
+                placeholder={t("account.nickname_placeholder")}
+                value={fullName}
+                onChange={(e) => {
+                  setFullName(e.target.value);
+                  clearFieldError("fullName");
+                }}
+                className={fieldErrors.fullName ? "has-error" : ""}
+              />
+              {fieldErrors.fullName && (
+                <p className="auth-card__field-error">{fieldErrors.fullName}</p>
+              )}
+            </div>
           )}
-          <input
-            type="email"
-            placeholder={t("account.email_placeholder")}
-            value={email}
-            onChange={(e) => setEmail(e.target.value)}
-            required
-          />
-          <input
-            type="password"
-            placeholder={t("account.password_placeholder")}
-            value={password}
-            onChange={(e) => setPassword(e.target.value)}
-            required
-            minLength={8}
-          />
+          <div className="auth-card__field">
+            <input
+              type="email"
+              placeholder={t("account.email_placeholder")}
+              value={email}
+              onChange={(e) => {
+                setEmail(e.target.value);
+                clearFieldError("email");
+              }}
+              className={fieldErrors.email ? "has-error" : ""}
+            />
+            {fieldErrors.email && <p className="auth-card__field-error">{fieldErrors.email}</p>}
+          </div>
+          <div className="auth-card__field">
+            <input
+              type="password"
+              placeholder={t("account.password_placeholder")}
+              value={password}
+              onChange={(e) => {
+                setPassword(e.target.value);
+                clearFieldError("password");
+                if (confirmPassword) clearFieldError("confirmPassword");
+              }}
+              className={fieldErrors.password ? "has-error" : ""}
+            />
+            {fieldErrors.password && (
+              <p className="auth-card__field-error">{fieldErrors.password}</p>
+            )}
+          </div>
+          {mode === "register" && (
+            <div className="auth-card__field">
+              <input
+                type="password"
+                placeholder={t("account.confirm_password_placeholder")}
+                value={confirmPassword}
+                onChange={(e) => {
+                  setConfirmPassword(e.target.value);
+                  clearFieldError("confirmPassword");
+                }}
+                className={fieldErrors.confirmPassword ? "has-error" : ""}
+              />
+              {fieldErrors.confirmPassword && (
+                <p className="auth-card__field-error">{fieldErrors.confirmPassword}</p>
+              )}
+            </div>
+          )}
           {errorMessage && <p className="auth-card__error">{errorMessage}</p>}
           <button type="submit" className="auth-card__submit" disabled={submitting}>
             {submitting

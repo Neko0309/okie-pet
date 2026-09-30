@@ -136,6 +136,22 @@
   border-color: var(--color-accent);
 }
 
+.auth-card__form input.has-error {
+  border-color: var(--color-danger);
+}
+
+.auth-card__field {
+  display: flex;
+  flex-direction: column;
+  gap: 4px;
+}
+
+.auth-card__field-error {
+  color: var(--color-danger);
+  font-size: 12px;
+  padding-left: 2px;
+}
+
 .auth-card__error {
   color: var(--color-danger);
   font-size: 12.5px;
