@@ -17,19 +17,26 @@ def send_verification_email(to_email: str, code: str) -> None:
         print(f"[email:dev] verification code for {to_email}: {code}")
         return
 
-    response = requests.post(
-        RESEND_API_URL,
-        headers={"Authorization": f"Bearer {settings.resend_api_key}"},
-        json={
-            "from": settings.email_from,
-            "to": [to_email],
-            "subject": "Your Okie Pet verification code",
-            "html": (
-                f"<p>Your verification code is:</p>"
-                f"<p style='font-size:28px;font-weight:700;letter-spacing:4px'>{code}</p>"
-                f"<p>It expires in 15 minutes.</p>"
-            ),
-        },
-        timeout=10,
-    )
-    response.raise_for_status()
+    try:
+        response = requests.post(
+            RESEND_API_URL,
+            headers={"Authorization": f"Bearer {settings.resend_api_key}"},
+            json={
+                "from": settings.email_from,
+                "to": [to_email],
+                "subject": "Your Okie Pet verification code",
+                "html": (
+                    f"<p>Your verification code is:</p>"
+                    f"<p style='font-size:28px;font-weight:700;letter-spacing:4px'>{code}</p>"
+                    f"<p>It expires in 15 minutes.</p>"
+                ),
+            },
+            timeout=10,
+        )
+        response.raise_for_status()
+    except requests.RequestException as e:
+        # Don't let a provider-side failure (e.g. Resend's sandbox sender
+        # can only deliver to the account owner's own address until a
+        # domain is verified) crash registration — the code is already
+        # committed to the DB by this point, just undelivered.
+        print(f"[email] failed to send verification code to {to_email}: {e}")
