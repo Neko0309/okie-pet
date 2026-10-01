@@ -1,8 +1,10 @@
-import { useState, type FormEvent } from "react";
+import { useEffect, useState, type FormEvent } from "react";
 import { Link } from "react-router-dom";
 import { useTranslation } from "react-i18next";
 import { useAuth } from "../lib/auth";
 import "./Account.css";
+
+const RESEND_COOLDOWN_SECONDS = 60;
 
 export default function Account() {
   const { t } = useTranslation();
@@ -128,6 +130,7 @@ function AuthForm() {
           clearUnverifiedEmail();
         }}
         resendCode={resendCode}
+        initialCooldown={pendingVerifyEmail ? RESEND_COOLDOWN_SECONDS : 0}
       />
     );
   }
@@ -236,16 +239,27 @@ function VerifyCodeForm({
   email,
   onBack,
   resendCode,
+  initialCooldown,
 }: {
   email: string;
   onBack: () => void;
   resendCode: (email: string) => Promise<void>;
+  initialCooldown: number;
 }) {
   const { t } = useTranslation();
   const { verifyEmail, errorKey } = useAuth();
   const [code, setCode] = useState("");
   const [submitting, setSubmitting] = useState(false);
   const [resendState, setResendState] = useState<"idle" | "sending" | "sent">("idle");
+  const [cooldown, setCooldown] = useState(initialCooldown);
+
+  useEffect(() => {
+    if (cooldown <= 0) return;
+    const timer = setInterval(() => {
+      setCooldown((c) => (c > 0 ? c - 1 : 0));
+    }, 1000);
+    return () => clearInterval(timer);
+  }, [cooldown > 0]);
 
   async function handleSubmit(e: FormEvent) {
     e.preventDefault();
@@ -260,10 +274,12 @@ function VerifyCodeForm({
   }
 
   async function handleResend() {
+    if (cooldown > 0) return;
     setResendState("sending");
     try {
       await resendCode(email);
       setResendState("sent");
+      setCooldown(RESEND_COOLDOWN_SECONDS);
     } catch {
       setResendState("idle");
     }
@@ -294,11 +310,13 @@ function VerifyCodeForm({
           type="button"
           className="auth-card__resend"
           onClick={handleResend}
-          disabled={resendState === "sending"}
+          disabled={resendState === "sending" || cooldown > 0}
         >
-          {resendState === "sent"
-            ? t("account.code_resent")
-            : t("account.resend_code")}
+          {cooldown > 0
+            ? t("account.resend_code_cooldown", { seconds: cooldown })
+            : resendState === "sent"
+              ? t("account.code_resent")
+              : t("account.resend_code")}
         </button>
         <button type="button" className="auth-card__back" onClick={onBack}>
           {t("account.back")}

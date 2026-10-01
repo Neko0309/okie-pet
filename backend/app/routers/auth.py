@@ -12,6 +12,7 @@ from app.core.security import (
     generate_verification_code,
     hash_password,
     hash_verification_code,
+    seconds_until_resend_allowed,
     verify_password,
 )
 from app.models.user import User
@@ -43,6 +44,12 @@ def register(payload: UserCreate, db: Session = Depends(get_db)):
     if existing is not None:
         if existing.is_verified:
             raise HTTPException(status_code=400, detail="Email already registered")
+        remaining = seconds_until_resend_allowed(existing.verification_code_expires_at)
+        if remaining > 0:
+            raise HTTPException(
+                status_code=429,
+                detail=f"Please wait {remaining}s before requesting another code",
+            )
         # Abandoned an earlier registration before entering the code (closed
         # the tab, lost the email, etc) — let them restart cleanly rather
         # than getting stuck with no way back to the verify screen.
@@ -92,10 +99,12 @@ def verify_email(payload: EmailVerifyRequest, db: Session = Depends(get_db)):
 @router.post("/resend-verification")
 def resend_verification(payload: ResendCodeRequest, db: Session = Depends(get_db)):
     user = db.query(User).filter(User.email == payload.email).first()
-    # Same response whether or not the account exists/is already verified,
-    # so this endpoint can't be used to enumerate registered emails.
+    # Same response whether or not the account exists/is already verified/
+    # on cooldown, so this endpoint can't be used to enumerate registered
+    # emails — a request within the cooldown window just silently no-ops.
     if user is not None and not user.is_verified:
-        _issue_verification_code(user, db)
+        if seconds_until_resend_allowed(user.verification_code_expires_at) == 0:
+            _issue_verification_code(user, db)
     return {"detail": "If that email is registered and unverified, a new code was sent."}
 
 

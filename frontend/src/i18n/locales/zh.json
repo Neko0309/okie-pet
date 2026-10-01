@@ -90,6 +90,7 @@
     "code_placeholder": "6位验证码",
     "verify_submit": "验证",
     "resend_code": "重新发送验证码",
+    "resend_code_cooldown": "重新发送（{{seconds}}秒）",
     "code_resent": "已重新发送",
     "back": "返回"
   },

@@ -9,6 +9,7 @@ from app.core.config import settings
 
 ALGORITHM = "HS256"
 VERIFICATION_CODE_TTL_MINUTES = 15
+RESEND_COOLDOWN_SECONDS = 60
 
 
 def generate_verification_code() -> str:
@@ -17,6 +18,17 @@ def generate_verification_code() -> str:
 
 def hash_verification_code(code: str) -> str:
     return hashlib.sha256(code.encode("utf-8")).hexdigest()
+
+
+def seconds_until_resend_allowed(code_expires_at: datetime | None) -> int:
+    """Codes don't separately track when they were issued — derive it from
+    their expiry (issued_at = expires_at - TTL) rather than adding a column
+    just for this."""
+    if code_expires_at is None:
+        return 0
+    issued_at = code_expires_at - timedelta(minutes=VERIFICATION_CODE_TTL_MINUTES)
+    elapsed = (datetime.now(timezone.utc) - issued_at).total_seconds()
+    return max(0, int(RESEND_COOLDOWN_SECONDS - elapsed))
 
 
 def hash_password(password: str) -> str:
