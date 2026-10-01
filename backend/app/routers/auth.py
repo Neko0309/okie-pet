@@ -18,12 +18,14 @@ from app.core.security import (
 from app.models.user import User
 from app.schemas.user import (
     EmailVerifyRequest,
+    ForgotPasswordRequest,
     ResendCodeRequest,
+    ResetPasswordRequest,
     Token,
     UserCreate,
     UserOut,
 )
-from app.services.email import send_verification_email
+from app.services.email import send_password_reset_email, send_verification_email
 
 router = APIRouter(prefix="/auth", tags=["auth"])
 
@@ -36,6 +38,16 @@ def _issue_verification_code(user: User, db: Session) -> None:
     )
     db.commit()
     send_verification_email(user.email, code)
+
+
+def _issue_reset_code(user: User, db: Session) -> None:
+    code = generate_verification_code()
+    user.reset_code_hash = hash_verification_code(code)
+    user.reset_code_expires_at = datetime.now(timezone.utc) + timedelta(
+        minutes=VERIFICATION_CODE_TTL_MINUTES
+    )
+    db.commit()
+    send_password_reset_email(user.email, code)
 
 
 @router.post("/register", response_model=UserOut, status_code=status.HTTP_201_CREATED)
@@ -106,6 +118,42 @@ def resend_verification(payload: ResendCodeRequest, db: Session = Depends(get_db
         if seconds_until_resend_allowed(user.verification_code_expires_at) == 0:
             _issue_verification_code(user, db)
     return {"detail": "If that email is registered and unverified, a new code was sent."}
+
+
+@router.post("/forgot-password")
+def forgot_password(payload: ForgotPasswordRequest, db: Session = Depends(get_db)):
+    user = db.query(User).filter(User.email == payload.email).first()
+    # Same generic response whether or not the email exists/is verified/is
+    # on cooldown, so this can't be used to enumerate accounts. Unverified
+    # accounts go through resend-verification instead, not this path.
+    if user is not None and user.is_verified:
+        if seconds_until_resend_allowed(user.reset_code_expires_at) == 0:
+            _issue_reset_code(user, db)
+    return {"detail": "If that email is registered, a reset code was sent."}
+
+
+@router.post("/reset-password", response_model=Token)
+def reset_password(payload: ResetPasswordRequest, db: Session = Depends(get_db)):
+    user = db.query(User).filter(User.email == payload.email).first()
+    invalid = HTTPException(status_code=400, detail="Invalid or expired code")
+
+    if user is None or user.reset_code_hash is None:
+        raise invalid
+    if user.reset_code_hash != hash_verification_code(payload.code):
+        raise invalid
+    if (
+        user.reset_code_expires_at is None
+        or datetime.now(timezone.utc) > user.reset_code_expires_at
+    ):
+        raise invalid
+
+    user.hashed_password = hash_password(payload.new_password)
+    user.reset_code_hash = None
+    user.reset_code_expires_at = None
+    db.commit()
+
+    token = create_access_token(subject=str(user.id))
+    return Token(access_token=token)
 
 
 @router.post("/login", response_model=Token)

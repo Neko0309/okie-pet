@@ -27,3 +27,11 @@ class User(Base):
     verification_code_expires_at: Mapped[datetime | None] = mapped_column(
         DateTime(timezone=True), nullable=True
     )
+
+    # Separate from verification_code_* so an in-progress password reset
+    # can't collide with (or be silently cleared by) an email-verification
+    # code, and vice versa.
+    reset_code_hash: Mapped[str | None] = mapped_column(String(64), nullable=True)
+    reset_code_expires_at: Mapped[datetime | None] = mapped_column(
+        DateTime(timezone=True), nullable=True
+    )

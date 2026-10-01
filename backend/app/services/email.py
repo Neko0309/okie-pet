@@ -12,9 +12,9 @@ from app.core.config import settings
 RESEND_API_URL = "https://api.resend.com/emails"
 
 
-def send_verification_email(to_email: str, code: str) -> None:
+def _send_code_email(to_email: str, code: str, *, purpose: str, subject: str) -> None:
     if not settings.resend_api_key:
-        print(f"[email:dev] verification code for {to_email}: {code}")
+        print(f"[email:dev] {purpose} code for {to_email}: {code}")
         return
 
     try:
@@ -24,9 +24,9 @@ def send_verification_email(to_email: str, code: str) -> None:
             json={
                 "from": settings.email_from,
                 "to": [to_email],
-                "subject": "Your Okie Pet verification code",
+                "subject": subject,
                 "html": (
-                    f"<p>Your verification code is:</p>"
+                    f"<p>Your code is:</p>"
                     f"<p style='font-size:28px;font-weight:700;letter-spacing:4px'>{code}</p>"
                     f"<p>It expires in 15 minutes.</p>"
                 ),
@@ -37,6 +37,18 @@ def send_verification_email(to_email: str, code: str) -> None:
     except requests.RequestException as e:
         # Don't let a provider-side failure (e.g. Resend's sandbox sender
         # can only deliver to the account owner's own address until a
-        # domain is verified) crash registration — the code is already
+        # domain is verified) crash the caller — the code is already
         # committed to the DB by this point, just undelivered.
-        print(f"[email] failed to send verification code to {to_email}: {e}")
+        print(f"[email] failed to send {purpose} code to {to_email}: {e}")
+
+
+def send_verification_email(to_email: str, code: str) -> None:
+    _send_code_email(
+        to_email, code, purpose="verification", subject="Your Okie Pet verification code"
+    )
+
+
+def send_password_reset_email(to_email: str, code: str) -> None:
+    _send_code_email(
+        to_email, code, purpose="password reset", subject="Your Okie Pet password reset code"
+    )

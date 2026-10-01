@@ -28,6 +28,8 @@ interface AuthContextValue {
   verifyEmail: (email: string, code: string) => Promise<void>;
   resendCode: (email: string) => Promise<void>;
   clearUnverifiedEmail: () => void;
+  forgotPassword: (email: string) => Promise<void>;
+  resetPassword: (email: string, code: string, newPassword: string) => Promise<void>;
   logout: () => void;
 }
 
@@ -134,6 +136,27 @@ export function AuthProvider({ children }: { children: ReactNode }) {
     setUnverifiedEmail(null);
   }
 
+  async function forgotPassword(email: string) {
+    await api.post("/auth/forgot-password", { email });
+  }
+
+  async function resetPassword(email: string, code: string, newPassword: string) {
+    setErrorKey(null);
+    setErrorDetail(null);
+    try {
+      const res = await api.post<{ access_token: string }>("/auth/reset-password", {
+        email,
+        code,
+        new_password: newPassword,
+      });
+      localStorage.setItem(TOKEN_KEY, res.data.access_token);
+      await loadUser();
+    } catch {
+      setErrorKey("account.error_verify");
+      throw new Error("reset failed");
+    }
+  }
+
   function logout() {
     localStorage.removeItem(TOKEN_KEY);
     setUser(null);
@@ -152,6 +175,8 @@ export function AuthProvider({ children }: { children: ReactNode }) {
         verifyEmail,
         resendCode,
         clearUnverifiedEmail,
+        forgotPassword,
+        resetPassword,
         logout,
       }}
     >

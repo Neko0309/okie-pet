@@ -54,6 +54,7 @@ function AuthForm() {
     unverifiedEmail,
     resendCode,
     clearUnverifiedEmail,
+    forgotPassword,
   } = useAuth();
   const [mode, setMode] = useState<"login" | "register">("login");
   const [email, setEmail] = useState("");
@@ -63,6 +64,7 @@ function AuthForm() {
   const [submitting, setSubmitting] = useState(false);
   const [pendingVerifyEmail, setPendingVerifyEmail] = useState<string | null>(null);
   const [fieldErrors, setFieldErrors] = useState<Record<string, string>>({});
+  const [forgotPasswordOpen, setForgotPasswordOpen] = useState(false);
 
   const EMAIL_PATTERN = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
 
@@ -131,6 +133,15 @@ function AuthForm() {
         }}
         resendCode={resendCode}
         initialCooldown={pendingVerifyEmail ? RESEND_COOLDOWN_SECONDS : 0}
+      />
+    );
+  }
+
+  if (forgotPasswordOpen) {
+    return (
+      <ForgotPasswordForm
+        forgotPassword={forgotPassword}
+        onBack={() => setForgotPasswordOpen(false)}
       />
     );
   }
@@ -204,6 +215,15 @@ function AuthForm() {
               <p className="auth-card__field-error">{fieldErrors.password}</p>
             )}
           </div>
+          {mode === "login" && (
+            <button
+              type="button"
+              className="auth-card__forgot-link"
+              onClick={() => setForgotPasswordOpen(true)}
+            >
+              {t("account.forgot_password_link")}
+            </button>
+          )}
           {mode === "register" && (
             <div className="auth-card__field">
               <input
@@ -304,6 +324,202 @@ function VerifyCodeForm({
           {errorKey && <p className="auth-card__error">{t(errorKey)}</p>}
           <button type="submit" className="auth-card__submit" disabled={submitting}>
             {submitting ? t("account.submitting") : t("account.verify_submit")}
+          </button>
+        </form>
+        <button
+          type="button"
+          className="auth-card__resend"
+          onClick={handleResend}
+          disabled={resendState === "sending" || cooldown > 0}
+        >
+          {cooldown > 0
+            ? t("account.resend_code_cooldown", { seconds: cooldown })
+            : resendState === "sent"
+              ? t("account.code_resent")
+              : t("account.resend_code")}
+        </button>
+        <button type="button" className="auth-card__back" onClick={onBack}>
+          {t("account.back")}
+        </button>
+      </div>
+    </div>
+  );
+}
+
+function ForgotPasswordForm({
+  forgotPassword,
+  onBack,
+}: {
+  forgotPassword: (email: string) => Promise<void>;
+  onBack: () => void;
+}) {
+  const { t } = useTranslation();
+  const [email, setEmail] = useState("");
+  const [submitting, setSubmitting] = useState(false);
+  const [sentTo, setSentTo] = useState<string | null>(null);
+
+  async function handleSubmit(e: FormEvent) {
+    e.preventDefault();
+    setSubmitting(true);
+    try {
+      await forgotPassword(email);
+      setSentTo(email);
+    } catch {
+      // Transient network/server failure — stay on this screen so they
+      // can retry rather than silently losing the submit.
+    } finally {
+      setSubmitting(false);
+    }
+  }
+
+  if (sentTo) {
+    return <ResetPasswordForm email={sentTo} forgotPassword={forgotPassword} onBack={onBack} />;
+  }
+
+  return (
+    <div className="account account--centered">
+      <div className="auth-card">
+        <p className="auth-card__verify-intro">{t("account.forgot_password_intro")}</p>
+        <form onSubmit={handleSubmit} className="auth-card__form">
+          <input
+            type="email"
+            placeholder={t("account.email_placeholder")}
+            value={email}
+            onChange={(e) => setEmail(e.target.value)}
+            required
+          />
+          <button type="submit" className="auth-card__submit" disabled={submitting}>
+            {submitting ? t("account.submitting") : t("account.forgot_password_submit")}
+          </button>
+        </form>
+        <button type="button" className="auth-card__back" onClick={onBack}>
+          {t("account.back")}
+        </button>
+      </div>
+    </div>
+  );
+}
+
+function ResetPasswordForm({
+  email,
+  forgotPassword,
+  onBack,
+}: {
+  email: string;
+  forgotPassword: (email: string) => Promise<void>;
+  onBack: () => void;
+}) {
+  const { t } = useTranslation();
+  const { resetPassword, errorKey } = useAuth();
+  const [code, setCode] = useState("");
+  const [newPassword, setNewPassword] = useState("");
+  const [confirmPassword, setConfirmPassword] = useState("");
+  const [fieldErrors, setFieldErrors] = useState<Record<string, string>>({});
+  const [submitting, setSubmitting] = useState(false);
+  const [resendState, setResendState] = useState<"idle" | "sending" | "sent">("idle");
+  const [cooldown, setCooldown] = useState(RESEND_COOLDOWN_SECONDS);
+
+  useEffect(() => {
+    if (cooldown <= 0) return;
+    const timer = setInterval(() => {
+      setCooldown((c) => (c > 0 ? c - 1 : 0));
+    }, 1000);
+    return () => clearInterval(timer);
+  }, [cooldown > 0]);
+
+  async function handleSubmit(e: FormEvent) {
+    e.preventDefault();
+    const errors: Record<string, string> = {};
+    if (newPassword.length < 8) {
+      errors.newPassword = t("account.error_password_too_short");
+    }
+    if (confirmPassword !== newPassword) {
+      errors.confirmPassword = t("account.error_password_mismatch");
+    }
+    setFieldErrors(errors);
+    if (Object.keys(errors).length > 0) return;
+
+    setSubmitting(true);
+    try {
+      await resetPassword(email, code, newPassword);
+    } catch {
+      // error surfaced via useAuth().errorKey
+    } finally {
+      setSubmitting(false);
+    }
+  }
+
+  async function handleResend() {
+    if (cooldown > 0) return;
+    setResendState("sending");
+    try {
+      await forgotPassword(email);
+      setResendState("sent");
+      setCooldown(RESEND_COOLDOWN_SECONDS);
+    } catch {
+      setResendState("idle");
+    }
+  }
+
+  return (
+    <div className="account account--centered">
+      <div className="auth-card">
+        <p className="auth-card__verify-intro">{t("account.verify_intro", { email })}</p>
+        <form onSubmit={handleSubmit} className="auth-card__form">
+          <input
+            type="text"
+            inputMode="numeric"
+            placeholder={t("account.code_placeholder")}
+            value={code}
+            onChange={(e) => setCode(e.target.value)}
+            maxLength={6}
+            required
+          />
+          <div className="auth-card__field">
+            <input
+              type="password"
+              placeholder={t("account.new_password_placeholder")}
+              value={newPassword}
+              onChange={(e) => {
+                setNewPassword(e.target.value);
+                if (fieldErrors.newPassword) {
+                  setFieldErrors((prev) => {
+                    const next = { ...prev };
+                    delete next.newPassword;
+                    return next;
+                  });
+                }
+              }}
+              className={fieldErrors.newPassword ? "has-error" : ""}
+            />
+            {fieldErrors.newPassword && (
+              <p className="auth-card__field-error">{fieldErrors.newPassword}</p>
+            )}
+          </div>
+          <div className="auth-card__field">
+            <input
+              type="password"
+              placeholder={t("account.confirm_password_placeholder")}
+              value={confirmPassword}
+              onChange={(e) => {
+                setConfirmPassword(e.target.value);
+                if (fieldErrors.confirmPassword) {
+                  setFieldErrors((prev) => {
+                    const next = { ...prev };
+                    delete next.confirmPassword;
+                    return next;
+                  });
+                }
+              }}
+              className={fieldErrors.confirmPassword ? "has-error" : ""}
+            />
+            {fieldErrors.confirmPassword && (
+              <p className="auth-card__field-error">{fieldErrors.confirmPassword}</p>
+            )}
+          </div>
+          {errorKey && <p className="auth-card__error">{t(errorKey)}</p>}
+          <button type="submit" className="auth-card__submit" disabled={submitting}>
+            {submitting ? t("account.submitting") : t("account.reset_password_submit")}
           </button>
         </form>
         <button
