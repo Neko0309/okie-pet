@@ -40,6 +40,15 @@ export async function createOrder(items: OrderItemInput[]): Promise<OrderOut> {
   return res.data;
 }
 
+export async function createCheckoutSession(items: OrderItemInput[]): Promise<string> {
+  const res = await api.post<{ url: string }>(
+    "/orders/checkout-session",
+    { items },
+    { headers: authHeaders() },
+  );
+  return res.data.url;
+}
+
 export async function fetchOrders(): Promise<OrderOut[]> {
   const res = await api.get<OrderOut[]>("/orders", { headers: authHeaders() });
   return res.data;

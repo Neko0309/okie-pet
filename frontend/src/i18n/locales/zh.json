@@ -57,13 +57,15 @@
     "checkout": "去结算",
     "placing": "提交中…",
     "login_to_checkout": "登录后结算",
-    "checkout_error_default": "下单失败,请重试"
+    "checkout_error_default": "下单失败,请重试",
+    "checkout_cancelled": "支付已取消,购物车还在这里"
   },
   "orders": {
     "title": "我的订单",
     "empty_title": "还没有订单",
     "empty_sub": "去挑点喜欢的东西吧",
     "just_placed": "下单成功!订单号 {{orderNumber}}",
+    "payment_success": "支付成功!感谢你的订单",
     "order_label": "订单号",
     "placed_at": "下单时间",
     "subtotal": "合计"

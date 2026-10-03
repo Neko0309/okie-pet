@@ -36,3 +36,7 @@ class OrderOut(BaseModel):
     subtotal: Decimal
     created_at: datetime
     items: list[OrderItemOut]
+
+
+class CheckoutSessionOut(BaseModel):
+    url: str

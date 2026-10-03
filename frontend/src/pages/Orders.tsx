@@ -1,27 +1,67 @@
 import { useEffect, useState } from "react";
-import { Link, useLocation } from "react-router-dom";
+import { Link, useLocation, useSearchParams } from "react-router-dom";
 import { useTranslation } from "react-i18next";
 import { fetchOrders, type OrderOut } from "../lib/orders";
+import { useCart } from "../lib/cart";
 import "./Orders.css";
 
 export default function Orders() {
   const { t } = useTranslation();
   const location = useLocation();
+  const [searchParams] = useSearchParams();
+  const { clear } = useCart();
   const justPlaced = (location.state as { justPlaced?: string } | null)?.justPlaced;
+  const paymentSuccess = searchParams.get("checkout") === "success";
 
   const [orders, setOrders] = useState<OrderOut[]>([]);
   const [loading, setLoading] = useState(true);
 
   useEffect(() => {
-    fetchOrders()
-      .then(setOrders)
-      .catch(() => setOrders([]))
-      .finally(() => setLoading(false));
+    let cancelled = false;
+
+    async function load() {
+      // Stripe redirects here as soon as payment succeeds, but the Order
+      // row is created asynchronously by the webhook — it's usually
+      // already there by the time this page loads, but give it a few
+      // short retries rather than flashing "no orders yet" on the rare
+      // slow delivery.
+      const maxAttempts = paymentSuccess ? 4 : 1;
+      for (let attempt = 1; attempt <= maxAttempts; attempt++) {
+        let data: OrderOut[] = [];
+        try {
+          data = await fetchOrders();
+        } catch {
+          data = [];
+        }
+        if (cancelled) return;
+        if (paymentSuccess && data.length === 0 && attempt < maxAttempts) {
+          await new Promise((r) => setTimeout(r, 1500));
+          continue;
+        }
+        setOrders(data);
+        setLoading(false);
+        return;
+      }
+    }
+
+    load();
+    return () => {
+      cancelled = true;
+    };
+    // eslint-disable-next-line react-hooks/exhaustive-deps
   }, []);
+
+  useEffect(() => {
+    // The local cart is still sitting in localStorage until we clear it —
+    // the order itself was created server-side by the webhook, not by
+    // this page.
+    if (paymentSuccess) clear();
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [paymentSuccess]);
 
   if (loading) return null;
 
-  if (orders.length === 0) {
+  if (orders.length === 0 && !paymentSuccess) {
     return (
       <div className="orders-empty">
         <span aria-hidden="true">📦</span>
@@ -42,6 +82,9 @@ export default function Orders() {
         <p className="orders-page__banner">
           {t("orders.just_placed", { orderNumber: justPlaced })}
         </p>
+      )}
+      {paymentSuccess && (
+        <p className="orders-page__banner">{t("orders.payment_success")}</p>
       )}
 
       <div className="orders-list">

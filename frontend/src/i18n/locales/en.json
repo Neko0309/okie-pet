@@ -57,13 +57,15 @@
     "checkout": "Checkout",
     "placing": "Placing order…",
     "login_to_checkout": "Log in to check out",
-    "checkout_error_default": "Couldn't place the order, please try again"
+    "checkout_error_default": "Couldn't place the order, please try again",
+    "checkout_cancelled": "Payment was cancelled — your cart is still here"
   },
   "orders": {
     "title": "My Orders",
     "empty_title": "No orders yet",
     "empty_sub": "Go find something your pet will love",
     "just_placed": "Order placed! Order number {{orderNumber}}",
+    "payment_success": "Payment successful! Thanks for your order",
     "order_label": "Order",
     "placed_at": "Placed",
     "subtotal": "Total"

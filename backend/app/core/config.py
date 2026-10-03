@@ -15,6 +15,10 @@ class Settings(BaseSettings):
     stripe_secret_key: str = ""
     stripe_webhook_secret: str = ""
 
+    # Where Stripe Checkout redirects back to after payment succeeds/is
+    # cancelled — the deployed frontend origin, not the API's own.
+    frontend_url: str = "http://localhost:5173"
+
     # Empty in local dev by default: email.py falls back to printing the
     # verification code to the console instead of actually sending it.
     resend_api_key: str = ""

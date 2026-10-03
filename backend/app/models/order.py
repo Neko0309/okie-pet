@@ -29,10 +29,18 @@ class Order(Base):
     user_id: Mapped[uuid.UUID] = mapped_column(
         UUID(as_uuid=True), ForeignKey("users.id", ondelete="CASCADE")
     )
-    # No real payment gateway wired up yet (see project notes) — every order
-    # lands here as "placed" and that's the end of the workflow for now.
+    # "paid" for real Stripe-confirmed orders (created by the webhook, see
+    # app/routers/stripe_webhook.py); "placed" is the historical default
+    # from before Stripe was wired up and from the still-available direct
+    # /orders endpoint (e.g. for a manually recorded phone/in-person sale).
     status: Mapped[str] = mapped_column(String(30), default="placed")
     subtotal: Mapped[Decimal] = mapped_column(Numeric(10, 2))
+
+    # Set only on Stripe-originated orders; doubles as the idempotency key
+    # that stops a retried webhook delivery from creating a duplicate order.
+    stripe_checkout_session_id: Mapped[str | None] = mapped_column(
+        String(255), unique=True, nullable=True
+    )
 
     created_at: Mapped[datetime] = mapped_column(
         DateTime(timezone=True), default=lambda: datetime.now(timezone.utc)

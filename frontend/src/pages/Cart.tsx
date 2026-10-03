@@ -1,37 +1,39 @@
 import { useState } from "react";
-import { Link, useNavigate } from "react-router-dom";
+import { Link, useSearchParams } from "react-router-dom";
 import { useTranslation } from "react-i18next";
 import { useCart } from "../lib/cart";
 import { useAuth } from "../lib/auth";
 import { localize } from "../lib/localize";
-import { createOrder } from "../lib/orders";
+import { createCheckoutSession } from "../lib/orders";
 import "./Cart.css";
 
 export default function Cart() {
   const { t, i18n } = useTranslation();
-  const { items, subtotal, updateQuantity, removeItem, clear } = useCart();
+  const { items, subtotal, updateQuantity, removeItem } = useCart();
   const { user } = useAuth();
-  const navigate = useNavigate();
+  const [searchParams] = useSearchParams();
   const [submitting, setSubmitting] = useState(false);
   const [error, setError] = useState<string | null>(null);
+  const paymentCancelled = searchParams.get("checkout") === "cancelled";
 
   async function handleCheckout() {
     if (!user) return;
     setSubmitting(true);
     setError(null);
     try {
-      const order = await createOrder(
+      const url = await createCheckoutSession(
         items.map((i) => ({
           product_id: i.productId,
           variant_id: i.variantId,
           quantity: i.quantity,
         })),
       );
-      clear();
-      navigate("/orders", { state: { justPlaced: order.order_number } });
+      // Full page navigation to Stripe's hosted checkout — the cart stays
+      // in localStorage until payment actually succeeds (see Orders.tsx),
+      // so cancelling and coming back doesn't lose it.
+      window.location.href = url;
     } catch (e: any) {
       setError(e?.response?.data?.detail ?? t("cart.checkout_error_default"));
-    } finally {
       setSubmitting(false);
     }
   }
@@ -52,6 +54,10 @@ export default function Cart() {
   return (
     <div className="cart-page container">
       <h1 className="cart-page__title">{t("cart.title")}</h1>
+
+      {paymentCancelled && (
+        <p className="cart-page__notice">{t("cart.checkout_cancelled")}</p>
+      )}
 
       <div className="cart-page__layout">
         <ul className="cart-list">
