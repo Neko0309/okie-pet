@@ -22,6 +22,10 @@ export default function AddToCartModal({
   const description = localize(lang, product.description ?? "", product.description_en) || null;
   const ingredients =
     localize(lang, product.ingredients ?? "", product.ingredients_en) || null;
+  // "supplies" covers both consumables (litter, fish oil) and pure
+  // accessories (toys, scratch boards) — a formula button never applies to
+  // the latter, so only show it there once we actually have data for it.
+  const showIngredients = product.category !== "supplies" || ingredients !== null;
 
   const cleanDescription = useMemo(
     () => (description ? DOMPurify.sanitize(description) : null),
@@ -99,22 +103,24 @@ export default function AddToCartModal({
           </div>
         )}
 
-        <div className="add-modal__section">
-          <button
-            type="button"
-            className="add-modal__ingredients-toggle"
-            onClick={() => setIngredientsOpen((open) => !open)}
-            aria-expanded={ingredientsOpen}
-          >
-            {t("add_modal.view_ingredients")}
-            <span aria-hidden="true">{ingredientsOpen ? "−" : "+"}</span>
-          </button>
-          {ingredientsOpen && (
-            <p className="add-modal__ingredients-body">
-              {ingredients ?? t("add_modal.ingredients_unavailable")}
-            </p>
-          )}
-        </div>
+        {showIngredients && (
+          <div className="add-modal__section">
+            <button
+              type="button"
+              className="add-modal__ingredients-toggle"
+              onClick={() => setIngredientsOpen((open) => !open)}
+              aria-expanded={ingredientsOpen}
+            >
+              {t("add_modal.view_ingredients")}
+              <span aria-hidden="true">{ingredientsOpen ? "−" : "+"}</span>
+            </button>
+            {ingredientsOpen && (
+              <p className="add-modal__ingredients-body">
+                {ingredients ?? t("add_modal.ingredients_unavailable")}
+              </p>
+            )}
+          </div>
+        )}
 
         {hasVariants && (
           <div className="add-modal__section">
