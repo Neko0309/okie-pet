@@ -4,7 +4,13 @@ import { useTranslation } from "react-i18next";
 import ProductCard from "../components/ProductCard";
 import SortDropdown from "../components/SortDropdown";
 import type { CategoryId } from "../data/categories";
-import { fetchProducts, type ApiProduct, type ApiVariant, type SortMode } from "../lib/products";
+import {
+  fetchProducts,
+  fetchVendors,
+  type ApiProduct,
+  type ApiVariant,
+  type SortMode,
+} from "../lib/products";
 import { useCart } from "../lib/cart";
 import "./Products.css";
 
@@ -30,6 +36,19 @@ export default function Products() {
   const [vendor, setVendor] = useState("");
   const [minPrice, setMinPrice] = useState("");
   const [maxPrice, setMaxPrice] = useState("");
+
+  const [vendors, setVendors] = useState<string[]>([]);
+  const [vendorDropdownOpen, setVendorDropdownOpen] = useState(false);
+
+  useEffect(() => {
+    fetchVendors()
+      .then(setVendors)
+      .catch(() => setVendors([]));
+  }, []);
+
+  const filteredVendors = vendors.filter((v) =>
+    v.toLowerCase().includes(vendorInput.trim().toLowerCase()),
+  );
 
   useEffect(() => {
     const timeout = setTimeout(() => {
@@ -82,13 +101,35 @@ export default function Products() {
     <div className="products container">
       <header className="products__header">
         <div className="products__filters">
-          <input
-            type="text"
-            className="products__filter-input products__filter-input--vendor"
-            placeholder={t("products.vendor_placeholder")}
-            value={vendorInput}
-            onChange={(e) => setVendorInput(e.target.value)}
-          />
+          <div className="products__vendor-field">
+            <input
+              type="text"
+              className="products__filter-input products__filter-input--vendor"
+              placeholder={t("products.vendor_placeholder")}
+              value={vendorInput}
+              onChange={(e) => setVendorInput(e.target.value)}
+              onFocus={() => setVendorDropdownOpen(true)}
+              onBlur={() => setTimeout(() => setVendorDropdownOpen(false), 150)}
+            />
+            {vendorDropdownOpen && filteredVendors.length > 0 && (
+              <ul className="products__vendor-dropdown">
+                {filteredVendors.map((v) => (
+                  <li key={v}>
+                    <button
+                      type="button"
+                      onMouseDown={(e) => e.preventDefault()}
+                      onClick={() => {
+                        setVendorInput(v);
+                        setVendorDropdownOpen(false);
+                      }}
+                    >
+                      {v}
+                    </button>
+                  </li>
+                ))}
+              </ul>
+            )}
+          </div>
           <div className="products__price-range">
             <input
               type="number"

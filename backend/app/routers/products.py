@@ -64,6 +64,17 @@ def list_products(
     return ProductListOut(items=items, total=total or 0, skip=skip, limit=limit)
 
 
+@router.get("/vendors", response_model=list[str])
+def list_vendors(db: Session = Depends(get_db)):
+    stmt = (
+        select(Product.vendor)
+        .where(Product.is_active.is_(True), Product.vendor.is_not(None), Product.vendor != "")
+        .distinct()
+        .order_by(Product.vendor)
+    )
+    return list(db.scalars(stmt).all())
+
+
 @router.get("/{product_id}", response_model=ProductOut)
 def get_product(product_id: uuid.UUID, db: Session = Depends(get_db)):
     stmt = (

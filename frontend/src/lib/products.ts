@@ -55,3 +55,8 @@ export async function fetchProducts(params: {
   const res = await api.get<ProductListResponse>("/products", { params: query });
   return res.data;
 }
+
+export async function fetchVendors(): Promise<string[]> {
+  const res = await api.get<string[]>("/products/vendors");
+  return res.data;
+}

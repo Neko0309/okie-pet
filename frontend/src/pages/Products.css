@@ -29,8 +29,45 @@
   color: var(--color-ink);
 }
 
+.products__vendor-field {
+  position: relative;
+}
+
 .products__filter-input--vendor {
   width: 160px;
+}
+
+.products__vendor-dropdown {
+  position: absolute;
+  top: calc(100% + 4px);
+  left: 0;
+  z-index: 20;
+  width: 200px;
+  max-height: 260px;
+  overflow-y: auto;
+  margin: 0;
+  padding: 6px;
+  list-style: none;
+  background: var(--color-surface);
+  border: 1.5px solid var(--color-card-line);
+  border-radius: 10px;
+  box-shadow: 0 8px 20px rgba(0, 0, 0, 0.1);
+}
+
+.products__vendor-dropdown button {
+  display: block;
+  width: 100%;
+  text-align: left;
+  padding: 7px 10px;
+  border-radius: 7px;
+  font-size: 13.5px;
+  color: var(--color-ink);
+  background: none;
+  border: none;
+}
+
+.products__vendor-dropdown button:hover {
+  background: var(--color-surface-2);
 }
 
 .products__filter-input--price {
