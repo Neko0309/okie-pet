@@ -92,9 +92,13 @@ class ProductInput:
 
 
 def _capitalize_first(text: str | None) -> str | None:
-    """Brand names should read as proper nouns — MyMemory passes already-
-    Latin names (zeze, honi, petshy...) through mostly unchanged, which
-    looks casual/lowercase next to the rest of the translated catalog."""
+    """MyMemory passes already-Latin brand names (zeze, honi, petshy...)
+    through mostly unchanged. Harmless on its own, but ~70% of products
+    have the brand name prefixed onto the Chinese name (e.g. "zeze 彩豆豆
+    方形冰垫"), which carries the same lowercase start into the product's
+    own translated name_en — looks casual next to the rest of the
+    translated catalog, which (being real translations, not a pass-
+    through) already comes back capitalized."""
     if not text:
         return text
     return text[0].upper() + text[1:]
@@ -124,8 +128,8 @@ def _sync_variants(product: Product, variants: list[VariantInput], external_sour
         seen_external_ids.add(v.external_id)
         existing = existing_by_external_id.get(v.external_id)
         if existing:
-            name_en = _resolve_translation(
-                v.name, existing.name, existing.name_en, translate_text
+            name_en = _capitalize_first(
+                _resolve_translation(v.name, existing.name, existing.name_en, translate_text)
             )
             existing.name = v.name
             existing.name_en = name_en
@@ -139,7 +143,7 @@ def _sync_variants(product: Product, variants: list[VariantInput], external_sour
                     external_source=external_source,
                     external_id=v.external_id,
                     name=v.name,
-                    name_en=translate_text(v.name),
+                    name_en=_capitalize_first(translate_text(v.name)),
                     price=v.price,
                     stock_quantity=v.stock_quantity,
                     sort=v.sort,
@@ -169,11 +173,13 @@ def upsert_product(db: Session, item: ProductInput) -> bool:
         )
     )
 
-    name_en = _resolve_translation(
-        item.name,
-        existing.name if existing else None,
-        existing.name_en if existing else None,
-        translate_text,
+    name_en = _capitalize_first(
+        _resolve_translation(
+            item.name,
+            existing.name if existing else None,
+            existing.name_en if existing else None,
+            translate_text,
+        )
     )
     description_en = _resolve_translation(
         item.description,
