@@ -91,6 +91,15 @@ class ProductInput:
     variants: list[VariantInput] = field(default_factory=list)
 
 
+def _capitalize_first(text: str | None) -> str | None:
+    """Brand names should read as proper nouns — MyMemory passes already-
+    Latin names (zeze, honi, petshy...) through mostly unchanged, which
+    looks casual/lowercase next to the rest of the translated catalog."""
+    if not text:
+        return text
+    return text[0].upper() + text[1:]
+
+
 def _resolve_translation(
     new_text: str | None,
     old_source_text: str | None,
@@ -172,11 +181,13 @@ def upsert_product(db: Session, item: ProductInput) -> bool:
         existing.description_en if existing else None,
         translate_html,
     )
-    vendor_en = _resolve_translation(
-        item.vendor,
-        existing.vendor if existing else None,
-        existing.vendor_en if existing else None,
-        translate_text,
+    vendor_en = _capitalize_first(
+        _resolve_translation(
+            item.vendor,
+            existing.vendor if existing else None,
+            existing.vendor_en if existing else None,
+            translate_text,
+        )
     )
 
     fields = dict(
