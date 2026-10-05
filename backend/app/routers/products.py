@@ -2,7 +2,7 @@ import uuid
 from typing import Literal
 
 from fastapi import APIRouter, Depends, HTTPException, Query
-from sqlalchemy import func, select
+from sqlalchemy import case, func, select
 from sqlalchemy.orm import Session, selectinload
 
 from app.core.database import get_db
@@ -31,12 +31,17 @@ def list_products(
     elif category:
         stmt = stmt.where(Product.category == category)
 
+    # Sold-out items sort after in-stock ones regardless of sort mode —
+    # applies within whatever `category` filter is active, not instead of
+    # it, so "all sold out" categories still show their items.
+    sold_out_last = case((Product.stock_quantity <= 0, 1), else_=0)
+
     if sort == "price-asc":
-        stmt = stmt.order_by(Product.price.asc())
+        stmt = stmt.order_by(sold_out_last, Product.price.asc())
     elif sort == "price-desc":
-        stmt = stmt.order_by(Product.price.desc())
+        stmt = stmt.order_by(sold_out_last, Product.price.desc())
     else:
-        stmt = stmt.order_by(Product.created_at.desc())
+        stmt = stmt.order_by(sold_out_last, Product.created_at.desc())
 
     total = db.scalar(select(func.count()).select_from(stmt.subquery()))
     items = db.scalars(stmt.offset(skip).limit(limit)).all()
