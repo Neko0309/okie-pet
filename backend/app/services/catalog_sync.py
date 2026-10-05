@@ -172,6 +172,12 @@ def upsert_product(db: Session, item: ProductInput) -> bool:
         existing.description_en if existing else None,
         translate_html,
     )
+    vendor_en = _resolve_translation(
+        item.vendor,
+        existing.vendor if existing else None,
+        existing.vendor_en if existing else None,
+        translate_text,
+    )
 
     fields = dict(
         name=item.name,
@@ -181,6 +187,7 @@ def upsert_product(db: Session, item: ProductInput) -> bool:
         stock_quantity=item.stock_quantity,
         category=map_category(item.category_names),
         vendor=item.vendor,
+        vendor_en=vendor_en,
         image_url=item.image_url,
         description=item.description,
         description_en=description_en,

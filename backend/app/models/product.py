@@ -42,6 +42,7 @@ class Product(Base):
     stock_quantity: Mapped[int] = mapped_column(Integer, default=0)
     category: Mapped[str] = mapped_column(String(50))
     vendor: Mapped[str | None] = mapped_column(String(255), nullable=True)
+    vendor_en: Mapped[str | None] = mapped_column(String(255), nullable=True)
     image_url: Mapped[str | None] = mapped_column(String(1000), nullable=True)
     is_active: Mapped[bool] = mapped_column(Boolean, default=True)
 

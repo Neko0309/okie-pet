@@ -3,12 +3,12 @@ from decimal import Decimal
 from typing import Literal
 
 from fastapi import APIRouter, Depends, HTTPException, Query
-from sqlalchemy import case, func, select
+from sqlalchemy import case, func, or_, select
 from sqlalchemy.orm import Session, selectinload
 
 from app.core.database import get_db
 from app.models.product import Product
-from app.schemas.product import ProductListOut, ProductOut
+from app.schemas.product import ProductListOut, ProductOut, VendorOut
 
 router = APIRouter(prefix="/products", tags=["products"])
 
@@ -40,7 +40,9 @@ def list_products(
         stmt = stmt.where(Product.category == category)
 
     if vendor:
-        stmt = stmt.where(Product.vendor.ilike(f"%{vendor}%"))
+        stmt = stmt.where(
+            or_(Product.vendor.ilike(f"%{vendor}%"), Product.vendor_en.ilike(f"%{vendor}%"))
+        )
     if min_price is not None:
         stmt = stmt.where(Product.price >= min_price)
     if max_price is not None:
@@ -64,15 +66,15 @@ def list_products(
     return ProductListOut(items=items, total=total or 0, skip=skip, limit=limit)
 
 
-@router.get("/vendors", response_model=list[str])
+@router.get("/vendors", response_model=list[VendorOut])
 def list_vendors(db: Session = Depends(get_db)):
     stmt = (
-        select(Product.vendor)
+        select(Product.vendor, Product.vendor_en)
         .where(Product.is_active.is_(True), Product.vendor.is_not(None), Product.vendor != "")
         .distinct()
         .order_by(Product.vendor)
     )
-    return list(db.scalars(stmt).all())
+    return [VendorOut(name=name, name_en=name_en) for name, name_en in db.execute(stmt)]
 
 
 @router.get("/{product_id}", response_model=ProductOut)

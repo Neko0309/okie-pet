@@ -20,9 +20,15 @@ export interface ApiProduct {
   stock_quantity: number;
   category: string;
   vendor: string | null;
+  vendor_en: string | null;
   image_url: string | null;
   is_active: boolean;
   variants: ApiVariant[];
+}
+
+export interface ApiVendor {
+  name: string;
+  name_en: string | null;
 }
 
 export interface ProductListResponse {
@@ -56,7 +62,7 @@ export async function fetchProducts(params: {
   return res.data;
 }
 
-export async function fetchVendors(): Promise<string[]> {
-  const res = await api.get<string[]>("/products/vendors");
+export async function fetchVendors(): Promise<ApiVendor[]> {
+  const res = await api.get<ApiVendor[]>("/products/vendors");
   return res.data;
 }

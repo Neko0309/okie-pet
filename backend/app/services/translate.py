@@ -10,6 +10,7 @@ catalog_sync.py for the caching logic that avoids re-translating text that
 hasn't changed since the last import, which is what keeps re-imports cheap.
 """
 
+import html
 import logging
 import time
 
@@ -30,20 +31,23 @@ def translate_text(text: str | None) -> str | None:
     try:
         result = MyMemoryTranslator(source=_SOURCE, target=_TARGET).translate(text)
         time.sleep(_DELAY_SECONDS)
-        return result or None
+        # MyMemory sometimes HTML-escapes punctuation (e.g. "Hell&apos;s
+        # Kitchen") even for plain-text requests — unescape so it doesn't
+        # render literally; harmless no-op when there's nothing to decode.
+        return html.unescape(result) if result else None
     except Exception as e:  # noqa: BLE001 — translation is best-effort
         logger.warning("translate_text failed for %r: %s", text[:60], e)
         return None
 
 
-def translate_html(html: str | None) -> str | None:
+def translate_html(html_fragment: str | None) -> str | None:
     """Translates only the text nodes of an HTML fragment, leaving tags
     (and things like <img> that shouldn't be touched) intact."""
-    html = (html or "").strip()
-    if not html:
+    html_fragment = (html_fragment or "").strip()
+    if not html_fragment:
         return None
     try:
-        soup = BeautifulSoup(html, "html.parser")
+        soup = BeautifulSoup(html_fragment, "html.parser")
         translator = MyMemoryTranslator(source=_SOURCE, target=_TARGET)
         for node in soup.find_all(string=True):
             text = str(node).strip()

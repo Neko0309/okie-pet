@@ -27,6 +27,7 @@ class ProductOut(BaseModel):
     stock_quantity: int
     category: str
     vendor: str | None
+    vendor_en: str | None
     image_url: str | None
     is_active: bool
     variants: list[VariantOut] = []
@@ -37,3 +38,8 @@ class ProductListOut(BaseModel):
     total: int
     skip: int
     limit: int
+
+
+class VendorOut(BaseModel):
+    name: str
+    name_en: str | None

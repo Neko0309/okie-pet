@@ -9,13 +9,15 @@ import {
   fetchVendors,
   type ApiProduct,
   type ApiVariant,
+  type ApiVendor,
   type SortMode,
 } from "../lib/products";
 import { useCart } from "../lib/cart";
+import { localize } from "../lib/localize";
 import "./Products.css";
 
 export default function Products() {
-  const { t } = useTranslation();
+  const { t, i18n } = useTranslation();
   const { addItem } = useCart();
   const [searchParams] = useSearchParams();
   // The top nav's category links are the only category picker now (used to
@@ -37,7 +39,7 @@ export default function Products() {
   const [minPrice, setMinPrice] = useState("");
   const [maxPrice, setMaxPrice] = useState("");
 
-  const [vendors, setVendors] = useState<string[]>([]);
+  const [vendors, setVendors] = useState<ApiVendor[]>([]);
   const [vendorDropdownOpen, setVendorDropdownOpen] = useState(false);
 
   useEffect(() => {
@@ -47,7 +49,9 @@ export default function Products() {
   }, []);
 
   const filteredVendors = vendors.filter((v) =>
-    v.toLowerCase().includes(vendorInput.trim().toLowerCase()),
+    localize(i18n.language, v.name, v.name_en)
+      .toLowerCase()
+      .includes(vendorInput.trim().toLowerCase()),
   );
 
   useEffect(() => {
@@ -113,20 +117,23 @@ export default function Products() {
             />
             {vendorDropdownOpen && filteredVendors.length > 0 && (
               <ul className="products__vendor-dropdown">
-                {filteredVendors.map((v) => (
-                  <li key={v}>
-                    <button
-                      type="button"
-                      onMouseDown={(e) => e.preventDefault()}
-                      onClick={() => {
-                        setVendorInput(v);
-                        setVendorDropdownOpen(false);
-                      }}
-                    >
-                      {v}
-                    </button>
-                  </li>
-                ))}
+                {filteredVendors.map((v) => {
+                  const label = localize(i18n.language, v.name, v.name_en);
+                  return (
+                    <li key={v.name}>
+                      <button
+                        type="button"
+                        onMouseDown={(e) => e.preventDefault()}
+                        onClick={() => {
+                          setVendorInput(label);
+                          setVendorDropdownOpen(false);
+                        }}
+                      >
+                        {label}
+                      </button>
+                    </li>
+                  );
+                })}
               </ul>
             )}
           </div>
