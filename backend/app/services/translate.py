@@ -12,6 +12,7 @@ hasn't changed since the last import, which is what keeps re-imports cheap.
 
 import html
 import logging
+import re
 import time
 
 from bs4 import BeautifulSoup
@@ -23,6 +24,17 @@ _SOURCE = "zh-CN"
 _TARGET = "en-US"
 _DELAY_SECONDS = 0.3  # be gentle on the free tier
 
+# MyMemory occasionally echoes back XLIFF-style inline placeholder tags
+# (<g id="...">...</g>, <x id="..."/>) instead of plain text — an artifact
+# of whatever translation-memory match it found internally. They mean
+# nothing to us and our output is never re-parsed as HTML, so they'd
+# otherwise render as literal "<g id=...>" text in the storefront.
+_XLIFF_TAG_RE = re.compile(r"</?[gx](?:\s+[^>]*)?/?>")
+
+
+def _strip_xliff_placeholders(text: str) -> str:
+    return _XLIFF_TAG_RE.sub("", text)
+
 
 def translate_text(text: str | None) -> str | None:
     text = (text or "").strip()
@@ -31,10 +43,12 @@ def translate_text(text: str | None) -> str | None:
     try:
         result = MyMemoryTranslator(source=_SOURCE, target=_TARGET).translate(text)
         time.sleep(_DELAY_SECONDS)
+        if not result:
+            return None
         # MyMemory sometimes HTML-escapes punctuation (e.g. "Hell&apos;s
         # Kitchen") even for plain-text requests — unescape so it doesn't
         # render literally; harmless no-op when there's nothing to decode.
-        return html.unescape(result) if result else None
+        return _strip_xliff_placeholders(html.unescape(result)).strip()
     except Exception as e:  # noqa: BLE001 — translation is best-effort
         logger.warning("translate_text failed for %r: %s", text[:60], e)
         return None
@@ -56,7 +70,7 @@ def translate_html(html_fragment: str | None) -> str | None:
             translated = translator.translate(text)
             time.sleep(_DELAY_SECONDS)
             if translated:
-                node.replace_with(translated)
+                node.replace_with(_strip_xliff_placeholders(translated).strip())
         return str(soup)
     except Exception as e:  # noqa: BLE001
         logger.warning("translate_html failed: %s", e)
