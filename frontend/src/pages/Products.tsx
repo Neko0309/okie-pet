@@ -48,11 +48,21 @@ export default function Products() {
       .catch(() => setVendors([]));
   }, []);
 
-  const filteredVendors = vendors.filter((v) =>
-    localize(i18n.language, v.name, v.name_en)
-      .toLowerCase()
-      .includes(vendorInput.trim().toLowerCase()),
-  );
+  const filteredVendors = vendors
+    .filter((v) =>
+      localize(i18n.language, v.name, v.name_en)
+        .toLowerCase()
+        .includes(vendorInput.trim().toLowerCase()),
+    )
+    // Sorted by whatever's actually displayed, not the Chinese name the
+    // backend returns them in — otherwise the English-mode list reads as
+    // a random order relative to the English labels shown.
+    .sort((a, b) =>
+      localize(i18n.language, a.name, a.name_en).localeCompare(
+        localize(i18n.language, b.name, b.name_en),
+        i18n.language === "en" ? "en" : "zh",
+      ),
+    );
 
   useEffect(() => {
     const timeout = setTimeout(() => {
