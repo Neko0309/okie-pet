@@ -22,6 +22,8 @@ class ProductOut(BaseModel):
     name_en: str | None
     description: str | None
     description_en: str | None
+    ingredients: str | None
+    ingredients_en: str | None
     price: Decimal
     old_price: Decimal | None
     stock_quantity: int

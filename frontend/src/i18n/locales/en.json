@@ -45,6 +45,8 @@
   },
   "add_modal": {
     "details": "Details",
+    "view_ingredients": "View ingredients",
+    "ingredients_unavailable": "Ingredient info not available yet",
     "choose_option": "Choose an option",
     "quantity": "Quantity",
     "confirm": "Add to cart",

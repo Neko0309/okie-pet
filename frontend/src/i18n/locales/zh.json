@@ -45,6 +45,8 @@
   },
   "add_modal": {
     "details": "详情",
+    "view_ingredients": "查看配方",
+    "ingredients_unavailable": "暂无配方信息",
     "choose_option": "选规格",
     "quantity": "数量",
     "confirm": "加入购物车",

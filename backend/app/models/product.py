@@ -37,6 +37,11 @@ class Product(Base):
     name_en: Mapped[str | None] = mapped_column(String(255), nullable=True)
     description: Mapped[str | None] = mapped_column(Text, nullable=True)
     description_en: Mapped[str | None] = mapped_column(Text, nullable=True)
+    # Ingredient/formula list — NOT part of the Pisell import pipeline
+    # (that data doesn't include it); researched and filled in manually
+    # per product. Null means "not researched yet", not "no ingredients".
+    ingredients: Mapped[str | None] = mapped_column(Text, nullable=True)
+    ingredients_en: Mapped[str | None] = mapped_column(Text, nullable=True)
     price: Mapped[Decimal] = mapped_column(Numeric(10, 2))
     old_price: Mapped[Decimal | None] = mapped_column(Numeric(10, 2), nullable=True)
     stock_quantity: Mapped[int] = mapped_column(Integer, default=0)
