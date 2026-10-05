@@ -19,7 +19,11 @@ def list_products(
     category: str | None = Query(default=None),
     sort: SortMode = Query(default="recommended"),
     skip: int = Query(default=0, ge=0),
-    limit: int = Query(default=24, ge=1, le=100),
+    # No pagination UI on the frontend yet — it fetches once and renders
+    # the whole list, so the cap just needs to comfortably clear the
+    # catalog size (155 active products as of 2026-10-05) rather than
+    # match a page size.
+    limit: int = Query(default=24, ge=1, le=300),
     db: Session = Depends(get_db),
 ):
     stmt = select(Product).where(Product.is_active.is_(True)).options(

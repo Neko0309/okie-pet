@@ -29,7 +29,7 @@ export default function Products() {
 
   useEffect(() => {
     setLoading(true);
-    fetchProducts({ category: activeCategory, sort: sortMode, limit: 100 })
+    fetchProducts({ category: activeCategory, sort: sortMode, limit: 300 })
       .then((res) => setProducts(res.items))
       .catch(() => setProducts([]))
       .finally(() => setLoading(false));
