@@ -3,7 +3,7 @@ import { useSearchParams } from "react-router-dom";
 import { useTranslation } from "react-i18next";
 import ProductCard from "../components/ProductCard";
 import SortDropdown from "../components/SortDropdown";
-import { CATEGORIES, type CategoryId } from "../data/categories";
+import type { CategoryId } from "../data/categories";
 import { fetchProducts, type ApiProduct, type ApiVariant, type SortMode } from "../lib/products";
 import { useCart } from "../lib/cart";
 import "./Products.css";
@@ -12,10 +12,11 @@ export default function Products() {
   const { t } = useTranslation();
   const { addItem } = useCart();
   const [searchParams] = useSearchParams();
-  const initialCategory = searchParams.get("cat") as CategoryId | null;
-  const [activeCategory, setActiveCategory] = useState<CategoryId | "all">(
-    initialCategory ?? "all",
-  );
+  // The top nav's category links are the only category picker now (used to
+  // be duplicated by an in-page tab row) — read straight from the URL on
+  // every change rather than local state, so clicking a different category
+  // while already on this page actually updates the list.
+  const activeCategory = (searchParams.get("cat") as CategoryId | null) ?? "all";
   const [sortMode, setSortMode] = useState<SortMode>("recommended");
   const [products, setProducts] = useState<ApiProduct[]>([]);
   const [loading, setLoading] = useState(true);
@@ -54,25 +55,6 @@ export default function Products() {
   return (
     <div className="products container">
       <header className="products__header">
-        <div className="products__tabs">
-          <button
-            type="button"
-            className={"products__tab" + (activeCategory === "all" ? " is-active" : "")}
-            onClick={() => setActiveCategory("all")}
-          >
-            {t("nav.all")}
-          </button>
-          {CATEGORIES.map((c) => (
-            <button
-              key={c.id}
-              type="button"
-              className={"products__tab" + (activeCategory === c.id ? " is-active" : "")}
-              onClick={() => setActiveCategory(c.id)}
-            >
-              {t(`category.${c.id}`)}
-            </button>
-          ))}
-        </div>
         <SortDropdown
           value={sortMode}
           onChange={setSortMode}

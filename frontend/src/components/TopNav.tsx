@@ -1,4 +1,4 @@
-import { Link, NavLink } from "react-router-dom";
+import { Link, NavLink, useSearchParams } from "react-router-dom";
 import { useTranslation } from "react-i18next";
 import SearchBar from "./SearchBar";
 import LanguageSwitcher from "./LanguageSwitcher";
@@ -9,6 +9,8 @@ import "./TopNav.css";
 export default function TopNav() {
   const { t } = useTranslation();
   const { count } = useCart();
+  const [searchParams] = useSearchParams();
+  const activeCategory = searchParams.get("cat");
 
   return (
     <>
@@ -56,12 +58,16 @@ export default function TopNav() {
           <NavLink
             to="/products"
             end
-            className={({ isActive }) => (isActive ? "is-active" : "")}
+            className={({ isActive }) => (isActive && !activeCategory ? "is-active" : "")}
           >
             {t("nav.all")}
           </NavLink>
           {CATEGORIES.map((c) => (
-            <Link key={c.id} to={`/products?cat=${c.id}`}>
+            <Link
+              key={c.id}
+              to={`/products?cat=${c.id}`}
+              className={activeCategory === c.id ? "is-active" : ""}
+            >
               {t(`category.${c.id}`)}
             </Link>
           ))}

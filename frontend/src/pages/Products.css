@@ -8,32 +8,9 @@
 .products__header {
   display: flex;
   align-items: center;
-  justify-content: space-between;
+  justify-content: flex-end;
   gap: 16px;
   flex-wrap: wrap;
-}
-
-.products__tabs {
-  display: flex;
-  gap: 8px;
-  flex-wrap: wrap;
-}
-
-.products__tab {
-  flex: none;
-  background: var(--color-surface);
-  border: 2px solid var(--color-line);
-  border-radius: 999px;
-  padding: 6px 18px;
-  font-size: 14.5px;
-  color: var(--color-ink-muted);
-}
-
-.products__tab.is-active {
-  border-color: var(--color-bg-deep);
-  background: var(--color-bg);
-  color: var(--color-ink);
-  font-weight: 600;
 }
 
 .products__grid {
