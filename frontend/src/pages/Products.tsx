@@ -21,6 +21,25 @@ export default function Products() {
   const [products, setProducts] = useState<ApiProduct[]>([]);
   const [loading, setLoading] = useState(true);
 
+  // Typed values update immediately (so the inputs feel responsive); the
+  // debounced copies are what actually drive the fetch, so a fast typist
+  // doesn't fire a request per keystroke.
+  const [vendorInput, setVendorInput] = useState("");
+  const [minPriceInput, setMinPriceInput] = useState("");
+  const [maxPriceInput, setMaxPriceInput] = useState("");
+  const [vendor, setVendor] = useState("");
+  const [minPrice, setMinPrice] = useState("");
+  const [maxPrice, setMaxPrice] = useState("");
+
+  useEffect(() => {
+    const timeout = setTimeout(() => {
+      setVendor(vendorInput);
+      setMinPrice(minPriceInput);
+      setMaxPrice(maxPriceInput);
+    }, 400);
+    return () => clearTimeout(timeout);
+  }, [vendorInput, minPriceInput, maxPriceInput]);
+
   const SORT_LABELS: Record<SortMode, string> = {
     recommended: t("products.sort_recommended"),
     "price-asc": t("products.sort_price_asc"),
@@ -29,11 +48,18 @@ export default function Products() {
 
   useEffect(() => {
     setLoading(true);
-    fetchProducts({ category: activeCategory, sort: sortMode, limit: 300 })
+    fetchProducts({
+      category: activeCategory,
+      sort: sortMode,
+      limit: 300,
+      vendor: vendor || undefined,
+      minPrice: minPrice ? Number(minPrice) : undefined,
+      maxPrice: maxPrice ? Number(maxPrice) : undefined,
+    })
       .then((res) => setProducts(res.items))
       .catch(() => setProducts([]))
       .finally(() => setLoading(false));
-  }, [activeCategory, sortMode]);
+  }, [activeCategory, sortMode, vendor, minPrice, maxPrice]);
 
   function handleAdd(product: ApiProduct, variant: ApiVariant | null, quantity: number) {
     addItem(
@@ -55,6 +81,36 @@ export default function Products() {
   return (
     <div className="products container">
       <header className="products__header">
+        <div className="products__filters">
+          <input
+            type="text"
+            className="products__filter-input products__filter-input--vendor"
+            placeholder={t("products.vendor_placeholder")}
+            value={vendorInput}
+            onChange={(e) => setVendorInput(e.target.value)}
+          />
+          <div className="products__price-range">
+            <input
+              type="number"
+              inputMode="decimal"
+              min={0}
+              className="products__filter-input products__filter-input--price"
+              placeholder={t("products.min_price_placeholder")}
+              value={minPriceInput}
+              onChange={(e) => setMinPriceInput(e.target.value)}
+            />
+            <span className="products__price-range-sep">–</span>
+            <input
+              type="number"
+              inputMode="decimal"
+              min={0}
+              className="products__filter-input products__filter-input--price"
+              placeholder={t("products.max_price_placeholder")}
+              value={maxPriceInput}
+              onChange={(e) => setMaxPriceInput(e.target.value)}
+            />
+          </div>
+        </div>
         <SortDropdown
           value={sortMode}
           onChange={setSortMode}

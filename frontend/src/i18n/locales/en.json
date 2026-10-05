@@ -29,6 +29,9 @@
   },
   "products": {
     "sort_label": "Sort: ",
+    "vendor_placeholder": "Search by brand",
+    "min_price_placeholder": "Min price",
+    "max_price_placeholder": "Max price",
     "sort_recommended": "Recommended",
     "sort_price_asc": "Price ↑",
     "sort_price_desc": "Price ↓",

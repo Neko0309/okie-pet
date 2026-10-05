@@ -1,4 +1,5 @@
 import uuid
+from decimal import Decimal
 from typing import Literal
 
 from fastapi import APIRouter, Depends, HTTPException, Query
@@ -17,6 +18,9 @@ SortMode = Literal["recommended", "price-asc", "price-desc"]
 @router.get("", response_model=ProductListOut)
 def list_products(
     category: str | None = Query(default=None),
+    vendor: str | None = Query(default=None),
+    min_price: Decimal | None = Query(default=None, ge=0),
+    max_price: Decimal | None = Query(default=None, ge=0),
     sort: SortMode = Query(default="recommended"),
     skip: int = Query(default=0, ge=0),
     # No pagination UI on the frontend yet — it fetches once and renders
@@ -34,6 +38,13 @@ def list_products(
         stmt = stmt.where(Product.old_price.is_not(None))
     elif category:
         stmt = stmt.where(Product.category == category)
+
+    if vendor:
+        stmt = stmt.where(Product.vendor.ilike(f"%{vendor}%"))
+    if min_price is not None:
+        stmt = stmt.where(Product.price >= min_price)
+    if max_price is not None:
+        stmt = stmt.where(Product.price <= max_price)
 
     # Sold-out items sort after in-stock ones regardless of sort mode —
     # applies within whatever `category` filter is active, not instead of

@@ -8,9 +8,47 @@
 .products__header {
   display: flex;
   align-items: center;
-  justify-content: flex-end;
+  justify-content: space-between;
   gap: 16px;
   flex-wrap: wrap;
+}
+
+.products__filters {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  flex-wrap: wrap;
+}
+
+.products__filter-input {
+  border: 1.5px solid var(--color-card-line);
+  border-radius: 10px;
+  padding: 8px 14px;
+  font-size: 13.5px;
+  background: var(--color-surface);
+  color: var(--color-ink);
+}
+
+.products__filter-input--vendor {
+  width: 160px;
+}
+
+.products__filter-input--price {
+  width: 110px;
+}
+
+.products__filter-input::placeholder {
+  color: var(--color-ink-muted);
+}
+
+.products__price-range {
+  display: flex;
+  align-items: center;
+  gap: 6px;
+}
+
+.products__price-range-sep {
+  color: var(--color-ink-muted);
 }
 
 .products__grid {

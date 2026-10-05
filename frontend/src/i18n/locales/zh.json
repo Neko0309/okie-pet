@@ -29,6 +29,9 @@
   },
   "products": {
     "sort_label": "排序：",
+    "vendor_placeholder": "按品牌搜索",
+    "min_price_placeholder": "最低价",
+    "max_price_placeholder": "最高价",
     "sort_recommended": "推荐",
     "sort_price_asc": "价格 ↑",
     "sort_price_desc": "价格 ↓",

@@ -36,12 +36,18 @@ export type SortMode = "recommended" | "price-asc" | "price-desc";
 
 export async function fetchProducts(params: {
   category?: CategoryId | "all";
+  vendor?: string;
+  minPrice?: number;
+  maxPrice?: number;
   sort?: SortMode;
   skip?: number;
   limit?: number;
 }): Promise<ProductListResponse> {
   const query: Record<string, string | number> = {};
   if (params.category && params.category !== "all") query.category = params.category;
+  if (params.vendor) query.vendor = params.vendor;
+  if (params.minPrice !== undefined) query.min_price = params.minPrice;
+  if (params.maxPrice !== undefined) query.max_price = params.maxPrice;
   if (params.sort) query.sort = params.sort;
   if (params.skip !== undefined) query.skip = params.skip;
   if (params.limit !== undefined) query.limit = params.limit;
