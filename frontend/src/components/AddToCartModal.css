@@ -227,28 +227,3 @@
   display: block;
   margin: 6px 0;
 }
-
-.add-modal__ingredients-toggle {
-  display: flex;
-  align-items: center;
-  justify-content: space-between;
-  width: 100%;
-  padding: 10px 14px;
-  border: 1.5px solid var(--color-card-line);
-  border-radius: 12px;
-  background: var(--color-surface);
-  font-size: 13px;
-  font-weight: 600;
-  color: var(--color-ink);
-}
-
-.add-modal__ingredients-body {
-  font-size: 12.5px;
-  line-height: 1.6;
-  color: var(--color-ink-muted);
-  background: var(--color-surface);
-  border: 1.5px solid var(--color-card-line);
-  border-radius: 12px;
-  padding: 10px 14px;
-  margin: 0;
-}

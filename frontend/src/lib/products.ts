@@ -15,8 +15,6 @@ export interface ApiProduct {
   name_en: string | null;
   description: string | null;
   description_en: string | null;
-  ingredients: string | null;
-  ingredients_en: string | null;
   price: string;
   old_price: string | null;
   stock_quantity: number;
